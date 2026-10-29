@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vereadores de Santo André</title>
+  <meta name="description" content="Quantas proposições cada vereador de Santo André apresentou, por tipo e por tema." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23FCBD27'/%3E%3Ctext x='16' y='24' font-family='Arial' font-weight='900' font-size='22' text-anchor='middle' fill='%23000'%3E§%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="estilo.css?v=1" />
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav__inner container">
+      <a href="./" class="marca"><span class="marca__icone">§</span><span class="marca__texto">Projetos <em>Santo André</em></span></a>
+      <ul class="nav__links">
+        <li><a href="./">Hoje</a></li>
+        <li><a href="explorar.html">Explorar</a></li>
+        <li><a href="vereadores.html" aria-current="page">Vereadores</a></li>
+        <li><a href="sobre.html">Sobre</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="container">
+      <p class="section-label">Produção legislativa</p>
+      <h1 class="hero__title">Quem propõe <em>o quê</em></h1>
+      <p class="hero__lede">Quantas proposições cada vereador apresentou, separadas por tipo. Quantidade <strong>não é qualidade</strong>: um requerimento pedindo tapa-buraco e um projeto de lei contam igual aqui. Use os filtros para comparar o que importa para você.</p>
+      <div class="hero__meta"><span>Atualizado em <b data-atualizado>—</b></span><span>Proposições coletivas fora da contagem</span></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="secao">
+      <div class="container">
+        <div class="controles">
+          <span class="controle">Período <span class="alternar" id="f-ano"></span></span>
+          <label class="controle">Tema <select id="f-tema"></select></label>
+        </div>
+        <div class="chips" id="f-cat" role="group" aria-label="Categorias incluídas"></div>
+        <div class="cartao" style="margin-top:16px">
+          <div id="legenda"></div>
+          <div class="ranking" id="ranking"></div>
+        </div>
+        <p class="secao__intro" style="margin-top:14px;font-size:13px">Clique no nome para ver as proposições do vereador. Contam todas as proposições em que ele aparece como autor ou coautor, exceto as assinadas por mais de cinco vereadores (moções e requerimentos coletivos). A Prefeitura e a Mesa Diretora aparecem no fim da lista.</p>
+      </div>
+    </section>
+
+    <section class="secao">
+      <div class="container">
+        <p class="section-label">Em números</p>
+        <h2 class="secao__titulo">Tabela por vereador</h2>
+        <div class="tabela-wrap"><table id="tabela"></table></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <a href="./" class="marca"><span class="marca__icone">§</span></a>
+      <nav class="footer__links">
+        <a href="./">Hoje</a>
+        <a href="explorar.html">Explorar</a>
+        <a href="vereadores.html">Vereadores</a>
+        <a href="sobre.html">Sobre</a>
+      </nav>
+      <p class="footer__info">Fonte: portal Câmara sem Papel, da Câmara Municipal de Santo André. Consulte sempre o texto oficial.</p>
+    </div>
+  </footer>
+
+  <script src="app.js?v=1"></script>
+  <script>
+  (function () {
+    var A = window.APP, CAT = A.CATEGORIAS;
+    A.carregar().then(function (D) {
+      var P = D.proposicoes.filter(function (p) { return !A.coletiva(p); });
+      var anos = Object.keys(P.reduce(function (o, p) { o[p.ano] = 1; return o; }, {})).sort();
+      var estado = { ano: '', tema: '', cats: CAT.map(function (c) { return c.nome; }) };
+
+      document.getElementById('legenda').innerHTML = A.legenda();
+      var fAno = document.getElementById('f-ano');
+      fAno.innerHTML = [['', 'Legislatura']].concat(anos.map(function (a) { return [a, a]; })).map(function (a) {
+        return '<button type="button" data-v="' + a[0] + '" aria-pressed="' + (a[0] === estado.ano) + '">' + a[1] + '</button>';
+      }).join('');
+      fAno.addEventListener('click', function (e) {
+        var b = e.target.closest('button'); if (!b) return;
+        estado.ano = b.dataset.v;
+        fAno.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
+        desenhar();
+      });
+      var temas = {};
+      P.forEach(function (p) { p.temas.forEach(function (t) { temas[t] = 1; }); });
+      var fTema = document.getElementById('f-tema');
+      fTema.innerHTML = '<option value="">Todos</option>' + Object.keys(temas).sort().map(function (t) { return '<option>' + A.esc(t) + '</option>'; }).join('');
+      fTema.addEventListener('change', function () { estado.tema = fTema.value; desenhar(); });
+      var fCat = document.getElementById('f-cat');
+      fCat.innerHTML = CAT.map(function (c) { return '<button type="button" data-v="' + c.nome + '" aria-pressed="true">' + c.nome + '</button>'; }).join('');
+      fCat.addEventListener('click', function (e) {
+        var b = e.target.closest('button'); if (!b) return;
+        var on = b.getAttribute('aria-pressed') !== 'true';
+        if (!on && estado.cats.length === 1) return;
+        b.setAttribute('aria-pressed', on);
+        estado.cats = CAT.map(function (c) { return c.nome; }).filter(function (n) { return fCat.querySelector('[data-v="' + n + '"]').getAttribute('aria-pressed') === 'true'; });
+        desenhar();
+      });
+
+      function desenhar() {
+        var por = {};
+        P.forEach(function (p) {
+          if (estado.ano && String(p.ano) !== estado.ano) return;
+          if (estado.tema && p.temas.indexOf(estado.tema) < 0) return;
+          if (estado.cats.indexOf(p.categoria) < 0) return;
+          p.autores.forEach(function (a) {
+            if (/^teste/i.test(a.nome)) return;
+            var r = por[a.ids] = por[a.ids] || { id: a.ids, nome: a.nome, total: 0, cat: {}, temas: {} };
+            r.total++;
+            r.cat[p.categoria] = (r.cat[p.categoria] || 0) + 1;
+            p.temas.forEach(function (t) { r.temas[t] = (r.temas[t] || 0) + 1; });
+          });
+        });
+        var lista = Object.keys(por).map(function (k) { return por[k]; });
+        function ehVereador(r) { return /^Ver\./i.test(r.nome); }
+        lista.sort(function (a, b) { return (ehVereador(b) - ehVereador(a)) || (b.total - a.total) || a.nome.localeCompare(b.nome); });
+        var max = Math.max.apply(null, lista.map(function (r) { return r.total; }).concat([1]));
+        var cats = CAT.filter(function (c) { return estado.cats.indexOf(c.nome) >= 0; });
+        function topTemas(r) {
+          return Object.keys(r.temas).sort(function (a, b) { return r.temas[b] - r.temas[a]; }).slice(0, 3);
+        }
+
+        document.getElementById('ranking').innerHTML = lista.length ? lista.map(function (r) {
+          var segs = cats.filter(function (c) { return r.cat[c.nome]; }).map(function (c) {
+            var n = r.cat[c.nome];
+            return '<i style="width:' + (n / max * 100) + '%;background:' + c.cor + '" data-dica="<b>' + A.esc(r.nome) + '</b><br>' + c.nome + ': ' + A.int(n) + '"></i>';
+          }).join('');
+          var dica = '<b>' + A.esc(r.nome) + '</b><br>' + A.int(r.total) + ' proposições' + (topTemas(r).length ? '<br>Temas mais frequentes: ' + topTemas(r).map(A.esc).join(', ') : '');
+          return '<a class="rk" href="explorar.html?autor=' + r.id + (estado.ano ? '&ano=' + estado.ano : '') + (estado.tema ? '&tema=' + encodeURIComponent(estado.tema) : '') + '">' +
+            '<span class="rk__nome" data-dica="' + dica.replace(/"/g, '&quot;') + '">' + A.esc(r.nome.replace(/^Ver\. /, '')) + '</span>' +
+            '<span class="rk__barra">' + segs + '</span><span class="rk__total">' + A.int(r.total) + '</span></a>';
+        }).join('') : '<p class="vazio">Nenhuma proposição com esses filtros.</p>';
+
+        document.getElementById('tabela').innerHTML = '<thead><tr><th>Autor</th><th>Total</th>' + cats.map(function (c) { return '<th>' + c.nome + '</th>'; }).join('') + '<th class="tabela-temas">Temas mais frequentes</th></tr></thead><tbody>' +
+          lista.map(function (r) {
+            return '<tr><td><a href="explorar.html?autor=' + r.id + '" style="color:inherit">' + A.esc(r.nome) + '</a></td><td><b>' + A.int(r.total) + '</b></td>' +
+              cats.map(function (c) { return '<td>' + A.int(r.cat[c.nome] || 0) + '</td>'; }).join('') +
+              '<td class="tabela-temas">' + topTemas(r).map(A.esc).join(', ') + '</td></tr>';
+          }).join('') + '</tbody>';
+      }
+      desenhar();
+    });
+  })();
+  </script>
+</body>
+</html>

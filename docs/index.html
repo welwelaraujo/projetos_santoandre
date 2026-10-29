@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projetos Santo André</title>
+  <meta name="description" content="Todo dia, as novas proposições da Câmara Municipal de Santo André: projetos de lei, requerimentos, moções, emendas e o que está na pauta." />
+  <meta property="og:title" content="Projetos Santo André — o que a Câmara está propondo" />
+  <meta property="og:description" content="Atualizado todo dia com os dados públicos da Câmara Municipal de Santo André." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23FCBD27'/%3E%3Ctext x='16' y='24' font-family='Arial' font-weight='900' font-size='22' text-anchor='middle' fill='%23000'%3E§%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="estilo.css?v=1" />
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav__inner container">
+      <a href="./" class="marca"><span class="marca__icone">§</span><span class="marca__texto">Projetos <em>Santo André</em></span></a>
+      <ul class="nav__links">
+        <li><a href="./" aria-current="page">Hoje</a></li>
+        <li><a href="explorar.html">Explorar</a></li>
+        <li><a href="vereadores.html">Vereadores</a></li>
+        <li><a href="sobre.html">Sobre</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="container">
+      <p class="section-label">Câmara Municipal de Santo André · Legislatura 2025–2028</p>
+      <h1 class="hero__title">O que a Câmara está <em>propondo</em></h1>
+      <p class="hero__lede">Todo dia de manhã, reunimos as proposições protocoladas na Câmara de Santo André: <strong>projetos de lei, requerimentos, moções, emendas e vetos</strong>. Em linguagem simples, com autor, tema e o ponto em que cada uma está.</p>
+      <div class="hero__meta"><span>Atualizado em <b data-atualizado>—</b></span><span>Dados públicos da Câmara</span><span id="h-total">—</span></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="secao">
+      <div class="container">
+        <div class="kpis" id="kpis"></div>
+      </div>
+    </section>
+
+    <section class="secao" id="pauta">
+      <div class="container">
+        <p class="section-label">Fila do plenário</p>
+        <h2 class="secao__titulo">Aguardando votação</h2>
+        <p class="secao__intro">Proposições que já passaram pelas comissões e estão na fila da <strong>Ordem do Dia</strong> (primeira, segunda ou votação única) ou aguardando leitura e votação. Algumas esperam meses até entrar numa sessão. Abaixo, os projetos e demais proposições (sem os requerimentos) que chegaram mais recentemente.</p>
+        <div class="lista" id="l-pauta"></div>
+        <p style="margin-top:20px"><a class="btn btn--outline" id="ver-pauta" href="explorar.html?situacao=pauta">Ver todas</a></p>
+      </div>
+    </section>
+
+    <section class="secao" id="novas">
+      <div class="container">
+        <p class="section-label">Protocoladas recentemente</p>
+        <h2 class="secao__titulo">Últimos 14 dias</h2>
+        <p class="secao__intro">Tudo o que entrou na Câmara nas duas últimas semanas, dia a dia. Filtre pelo tipo de proposição.</p>
+        <div class="chips" id="f-cat" role="group" aria-label="Filtrar por tipo"></div>
+        <div id="l-novas" style="margin-top:20px"></div>
+        <p style="margin-top:24px"><a class="btn btn--outline" href="explorar.html">Buscar em todas as proposições →</a></p>
+      </div>
+    </section>
+
+    <section class="secao" id="movimentacoes">
+      <div class="container">
+        <p class="section-label">Andamento</p>
+        <h2 class="secao__titulo">O que mudou de fase</h2>
+        <p class="secao__intro">A cada coleta, comparamos a situação e a fase de cada proposição com o dia anterior. Aqui estão as mudanças mais recentes.</p>
+        <div class="cartao"><div class="movs" id="l-movs"></div></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <a href="./" class="marca"><span class="marca__icone">§</span></a>
+      <nav class="footer__links">
+        <a href="./">Hoje</a>
+        <a href="explorar.html">Explorar</a>
+        <a href="vereadores.html">Vereadores</a>
+        <a href="sobre.html">Sobre</a>
+      </nav>
+      <p class="footer__info">Fonte: portal Câmara sem Papel, da Câmara Municipal de Santo André. Consulte sempre o texto oficial.</p>
+    </div>
+  </footer>
+
+  <script src="app.js?v=1"></script>
+  <script>
+  (function () {
+    var A = window.APP;
+    A.carregar().then(function (D) {
+      var P = D.proposicoes;
+      var ref = new Date(D.atualizado_em.slice(0, 10) + 'T12:00:00');
+      function diasAtras(n) { var d = new Date(ref); d.setDate(d.getDate() - n); return A.diaISO(d); }
+      var ano = D.atualizado_em.slice(0, 4);
+      var semana = P.filter(function (p) { return p.data.slice(0, 10) > diasAtras(7); });
+      var pauta = P.filter(A.naPauta);
+      var pls = P.filter(function (p) { return p.categoria === 'Projetos de lei' && String(p.ano) === ano; });
+
+      document.getElementById('h-total').textContent = A.int(P.length) + ' proposições desde 2025';
+      document.getElementById('kpis').innerHTML = [
+        ['Últimos 7 dias', semana.length, 'proposições protocoladas', 'var(--yellow)'],
+        ['Projetos de lei em ' + ano, pls.length, pls.filter(function (p) { return p.situacao === 'Tramitando'; }).length + ' ainda tramitando', 'var(--c-pl)'],
+        ['Aguardam plenário', pauta.length, 'na fila da Ordem do Dia', 'var(--yellow)'],
+        ['Requerimentos em ' + ano, P.filter(function (p) { return p.categoria === 'Requerimentos' && String(p.ano) === ano; }).length, 'pedidos e cobranças ao Executivo', 'var(--c-req)']
+      ].map(function (k) {
+        return '<div class="kpi" style="--kpi-cor:' + k[3] + '"><div class="kpi__rotulo">' + k[0] + '</div><div class="kpi__valor">' + A.int(k[1]) + '</div><div class="kpi__sub">' + k[2] + '</div></div>';
+      }).join('');
+
+      document.getElementById('l-pauta').innerHTML = pauta.length
+        ? pauta.filter(function (p) { return p.categoria !== 'Requerimentos'; }).slice(0, 10).map(function (p) { return A.cartao(p); }).join('')
+        : '<p class="vazio">Nenhuma proposição aguardando plenário neste momento.</p>';
+      document.getElementById('ver-pauta').textContent = 'Ver todas as ' + A.int(pauta.length) + ' →';
+
+      // Últimos 14 dias, agrupados por data de protocolo.
+      var recentes = P.filter(function (p) { return p.data.slice(0, 10) > diasAtras(14); });
+      var cat = 'Todas';
+      var chips = document.getElementById('f-cat');
+      chips.innerHTML = ['Todas'].concat(A.CATEGORIAS.map(function (c) { return c.nome; })).map(function (n) {
+        var q = n === 'Todas' ? recentes.length : recentes.filter(function (p) { return p.categoria === n; }).length;
+        return '<button type="button" data-v="' + n + '" aria-pressed="' + (n === cat) + '">' + n + ' · ' + q + '</button>';
+      }).join('');
+      chips.addEventListener('click', function (e) {
+        var b = e.target.closest('button'); if (!b) return;
+        cat = b.dataset.v;
+        chips.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
+        desenhaNovas();
+      });
+      function desenhaNovas() {
+        var lista = recentes.filter(function (p) { return cat === 'Todas' || p.categoria === cat; });
+        var dias = {};
+        lista.forEach(function (p) { (dias[p.data.slice(0, 10)] = dias[p.data.slice(0, 10)] || []).push(p); });
+        var chaves = Object.keys(dias).sort().reverse();
+        document.getElementById('l-novas').innerHTML = chaves.length ? chaves.map(function (k) {
+          var dt = new Date(k + 'T12:00:00');
+          var sem = dt.toLocaleDateString('pt-BR', { weekday: 'long' });
+          return '<div class="dia"><div class="dia__data"><div class="dia__dia">' + k.slice(8, 10) + '</div>' +
+            '<div class="dia__mes">' + A.MESES[dt.getMonth()] + ' · ' + sem + '</div>' +
+            '<div class="dia__qtd">' + dias[k].length + (dias[k].length > 1 ? ' proposições' : ' proposição') + '</div></div>' +
+            '<div class="lista">' + dias[k].map(function (p) { return A.cartao(p, { semData: true }); }).join('') + '</div></div>';
+        }).join('') : '<p class="vazio">Nada protocolado neste período.</p>';
+      }
+      desenhaNovas();
+
+      var movs = D.movimentacoes.filter(function (m) { return m.evento === 'mudou' && D.porId[m.id]; }).slice(-40).reverse();
+      document.getElementById('l-movs').innerHTML = movs.length ? movs.map(function (m) {
+        var p = D.porId[m.id];
+        return '<div class="mov"><div class="mov__quando">' + A.data(m.quando) + '</div><div>' +
+          '<a class="mov__o" href="' + A.linkCamara(p) + '" target="_blank" rel="noopener">' + A.esc(p.tipo) + ' nº ' + p.numero + '/' + p.ano + '</a> — ' +
+          A.esc(A.frase(p.ementa, p.nomes).slice(0, 140)) + (p.ementa.length > 140 ? '…' : '') + '<br>' +
+          '<span class="mov__seta">' + A.esc(m.de.fase || m.de.situacao) + ' →</span> <span class="mov__para">' + A.esc(m.para.fase || m.para.situacao) + '</span></div></div>';
+      }).join('') : '<p class="vazio">As mudanças de fase aparecem a partir da segunda coleta diária.</p>';
+    });
+  })();
+  </script>
+</body>
+</html>

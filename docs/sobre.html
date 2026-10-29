@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sobre o projeto</title>
+  <meta name="description" content="De onde vêm os dados, como a coleta diária funciona e quais são os limites." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23FCBD27'/%3E%3Ctext x='16' y='24' font-family='Arial' font-weight='900' font-size='22' text-anchor='middle' fill='%23000'%3E§%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="estilo.css?v=1" />
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav__inner container">
+      <a href="./" class="marca"><span class="marca__icone">§</span><span class="marca__texto">Projetos <em>Santo André</em></span></a>
+      <ul class="nav__links">
+        <li><a href="./">Hoje</a></li>
+        <li><a href="explorar.html">Explorar</a></li>
+        <li><a href="vereadores.html">Vereadores</a></li>
+        <li><a href="sobre.html" aria-current="page">Sobre</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="doc container">
+    <div class="doc__grid">
+      <aside class="doc__indice">
+        <p>Nesta página</p>
+        <ol>
+          <li><a href="#fonte">De onde vêm os dados</a></li>
+          <li><a href="#rotina">A coleta diária</a></li>
+          <li><a href="#tipos">O que entra</a></li>
+          <li><a href="#temas">Temas</a></li>
+          <li><a href="#limites">Limites</a></li>
+        </ol>
+      </aside>
+      <article class="doc__corpo">
+        <h1>Sobre o <em>projeto</em></h1>
+        <p>Este site acompanha, todo dia, o que é protocolado na <strong>Câmara Municipal de Santo André</strong>. A ideia é simples: a Câmara já publica tudo, mas em um sistema difícil de ler. Aqui, as mesmas informações aparecem organizadas por dia, por vereador e por tema.</p>
+        <p>O site é independente e não tem vínculo com a Câmara, com partidos ou com mandatos.</p>
+
+        <h2 id="fonte"><span>01</span>De onde vêm os dados</h2>
+        <p>Tudo vem do portal público <a href="https://camarasempapel.cmsandre.sp.gov.br/" target="_blank" rel="noopener">Câmara sem Papel</a>, da própria Câmara, na consulta de produção legislativa por tipo e ano. De cada proposição guardamos número, ementa, autores, data de protocolo, situação e fase atual. Cada cartão tem o link para o processo original, onde estão o texto integral, os pareceres e a tramitação completa.</p>
+
+        <h2 id="rotina"><span>02</span>A coleta diária</h2>
+        <p>Todo dia, por volta das 6h (horário de Brasília), um robô no GitHub Actions lê de novo a legislatura inteira (de 2025 até hoje), grava o resultado e publica o site. Comparando com a coleta do dia anterior, ele registra:</p>
+        <ul>
+          <li><strong>proposições novas</strong>, que aparecem em “Últimos 14 dias”;</li>
+          <li><strong>mudanças de situação ou fase</strong>, como a entrada na Ordem do Dia ou o arquivamento, que aparecem em “O que mudou de fase”.</li>
+        </ul>
+        <p>Se o portal da Câmara estiver fora do ar, o site continua mostrando a última coleta que deu certo.</p>
+
+        <h2 id="tipos"><span>03</span>O que entra</h2>
+        <p>Projetos de lei (de vereadores e do Executivo, incluindo complementares e substitutivos), emendas à Lei Orgânica, projetos de decreto legislativo e de resolução, emendas, vetos, moções e requerimentos (incluindo os de informação, de audiência pública e de CPI, e os abaixo-assinados).</p>
+        <p>Ficam de fora as <strong>indicações</strong> (milhares por ano, quase todas pedidos de zeladoria), os votos de aplauso, pesar e congratulações, as atas e os documentos administrativos.</p>
+        <p>“<strong>Aguarda plenário</strong>” marca as proposições que tramitam e cuja fase atual é a Ordem do Dia (primeira, segunda ou votação única) ou a leitura e votação em plenário. É uma fila: estar nela não significa que a votação está marcada para hoje.</p>
+
+        <h2 id="temas"><span>04</span>Temas</h2>
+        <p>Os temas são atribuídos <strong>automaticamente</strong>, por palavras-chave na ementa. Por exemplo, “creche” ou “escola” levam a Educação, e “Guarda Civil” ou “ronda” levam a Segurança. Uma proposição pode ter mais de um tema ou nenhum. A classificação ajuda a navegar, mas erra: confira sempre a ementa.</p>
+
+        <h2 id="limites"><span>05</span>Limites</h2>
+        <ul>
+          <li>A situação “Arquivado” é a informada pela Câmara e não diz se a proposição foi aprovada ou rejeitada. Requerimentos, por exemplo, são arquivados depois de respondidos.</li>
+          <li>O ranking de vereadores conta quantidade, não relevância nem resultado.</li>
+          <li>Os nomes dos autores aparecem como estão no cadastro da Câmara. Um mesmo vereador pode ter mais de um cadastro.</li>
+          <li>O histórico de mudanças de fase só existe a partir do início da coleta diária, em 29/10/2026.</li>
+        </ul>
+        <p>O código e os dados brutos (JSON) estão no <a href="https://github.com/welwelaraujo/projetos_santoandre" target="_blank" rel="noopener">repositório do projeto</a>.</p>
+      </article>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <a href="./" class="marca"><span class="marca__icone">§</span></a>
+      <nav class="footer__links">
+        <a href="./">Hoje</a>
+        <a href="explorar.html">Explorar</a>
+        <a href="vereadores.html">Vereadores</a>
+        <a href="sobre.html">Sobre</a>
+      </nav>
+      <p class="footer__info">Fonte: portal Câmara sem Papel, da Câmara Municipal de Santo André. Consulte sempre o texto oficial.</p>
+    </div>
+  </footer>
+</body>
+</html>

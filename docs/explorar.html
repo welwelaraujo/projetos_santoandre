@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Explorar proposições</title>
+  <meta name="description" content="Busque e filtre todas as proposições da Câmara Municipal de Santo André desde 2025." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23FCBD27'/%3E%3Ctext x='16' y='24' font-family='Arial' font-weight='900' font-size='22' text-anchor='middle' fill='%23000'%3E§%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="estilo.css?v=1" />
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav__inner container">
+      <a href="./" class="marca"><span class="marca__icone">§</span><span class="marca__texto">Projetos <em>Santo André</em></span></a>
+      <ul class="nav__links">
+        <li><a href="./">Hoje</a></li>
+        <li><a href="explorar.html" aria-current="page">Explorar</a></li>
+        <li><a href="vereadores.html">Vereadores</a></li>
+        <li><a href="sobre.html">Sobre</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="container">
+      <p class="section-label">Todas as proposições</p>
+      <h1 class="hero__title">Busque na <em>Câmara</em></h1>
+      <p class="hero__lede">Procure por palavra, vereador, tema ou tipo. Os filtros ficam no endereço da página, então dá para compartilhar uma busca pronta.</p>
+      <div class="hero__meta"><span>Atualizado em <b data-atualizado>—</b></span></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="secao">
+      <div class="container">
+        <form class="filtros" id="filtros" onsubmit="return false">
+          <label class="busca">Palavra-chave<input type="search" id="q" placeholder="Ex.: creche, Plano Diretor, iluminação, Vila Luzita…" autocomplete="off" /></label>
+          <label>Categoria<select id="categoria"></select></label>
+          <label>Tipo<select id="tipo"></select></label>
+          <label>Autor<select id="autor"></select></label>
+          <label>Tema<select id="tema"></select></label>
+          <label>Situação<select id="situacao"></select></label>
+          <label>Ano<select id="ano"></select></label>
+        </form>
+        <div class="resumo-busca">
+          <span id="contagem">Carregando…</span>
+          <span style="display:flex;gap:10px;flex-wrap:wrap">
+            <button type="button" class="btn btn--outline btn--sm" id="limpar">Limpar filtros</button>
+            <button type="button" class="btn btn--outline btn--sm" id="csv">Baixar CSV</button>
+          </span>
+        </div>
+        <div class="lista" id="lista"></div>
+        <div class="paginas" id="paginas"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <a href="./" class="marca"><span class="marca__icone">§</span></a>
+      <nav class="footer__links">
+        <a href="./">Hoje</a>
+        <a href="explorar.html">Explorar</a>
+        <a href="vereadores.html">Vereadores</a>
+        <a href="sobre.html">Sobre</a>
+      </nav>
+      <p class="footer__info">Fonte: portal Câmara sem Papel, da Câmara Municipal de Santo André. Consulte sempre o texto oficial.</p>
+    </div>
+  </footer>
+
+  <script src="app.js?v=1"></script>
+  <script>
+  (function () {
+    var A = window.APP, POR_PAGINA = 30, pagina = 1, filtrados = [];
+    var campos = ['q', 'categoria', 'tipo', 'autor', 'tema', 'situacao', 'ano'];
+    var el = {};
+    campos.forEach(function (c) { el[c] = document.getElementById(c); });
+
+    function opcoes(sel, rotuloTodos, valores) {
+      sel.innerHTML = '<option value="">' + rotuloTodos + '</option>' + valores.map(function (v) {
+        return '<option value="' + A.esc(v[0]) + '">' + A.esc(v[1]) + '</option>';
+      }).join('');
+    }
+    function contar(P, chave) {
+      var c = {};
+      P.forEach(function (p) { [].concat(chave(p)).forEach(function (k) { if (k !== '' && k != null) c[k] = (c[k] || 0) + 1; }); });
+      return c;
+    }
+
+    A.carregar().then(function (D) {
+      var P = D.proposicoes;
+      // Busca sem acento; cada proposição ganha um texto pré-normalizado.
+      P.forEach(function (p) {
+        p._txt = A.semAcento([p.ementa, p.resumo_ia, p.tipo, p.numero + '/' + p.ano, p.processo, p.autores.map(function (a) { return a.nome; }).join(' ')].join(' '));
+      });
+
+      opcoes(el.categoria, 'Todas', A.CATEGORIAS.map(function (c) { return [c.nome, c.nome]; }));
+      var tipos = contar(P, function (p) { return p.tipo; });
+      opcoes(el.tipo, 'Todos', Object.keys(tipos).sort().map(function (t) { return [t, t + ' (' + tipos[t] + ')']; }));
+      var nomes = {}, qAut = contar(P, function (p) { return A.coletiva(p) ? [] : p.autores.map(function (a) { nomes[a.ids] = a.nome; return a.ids; }); });
+      opcoes(el.autor, 'Todos', Object.keys(nomes).sort(function (a, b) { return nomes[a].replace(/^Ver\. /, '').localeCompare(nomes[b].replace(/^Ver\. /, '')); })
+        .map(function (id) { return [id, nomes[id] + ' (' + qAut[id] + ')']; }));
+      var temas = contar(P, function (p) { return p.temas; });
+      opcoes(el.tema, 'Todos', Object.keys(temas).sort().map(function (t) { return [t, t + ' (' + temas[t] + ')']; }).concat([['__sem', 'Sem tema identificado']]));
+      opcoes(el.situacao, 'Todas', [['pauta', 'Aguarda plenário']].concat(Object.keys(contar(P, function (p) { return p.situacao; })).sort().map(function (s) { return [s, s]; })));
+      opcoes(el.ano, 'Todos', Object.keys(contar(P, function (p) { return p.ano; })).sort().reverse().map(function (a) { return [a, a]; }));
+
+      var url = new URLSearchParams(location.search);
+      campos.forEach(function (c) { if (url.get(c)) el[c].value = url.get(c); });
+
+      function aplicar() {
+        var f = {};
+        campos.forEach(function (c) { f[c] = el[c].value; });
+        var termos = A.semAcento(f.q).split(/\s+/).filter(Boolean);
+        filtrados = P.filter(function (p) {
+          if (f.categoria && p.categoria !== f.categoria) return false;
+          if (f.tipo && p.tipo !== f.tipo) return false;
+          if (f.autor && (A.coletiva(p) || !p.autores.some(function (a) { return a.ids === f.autor; }))) return false;
+          if (f.tema === '__sem' ? p.temas.length : f.tema && p.temas.indexOf(f.tema) < 0) return false;
+          if (f.situacao === 'pauta' ? !A.naPauta(p) : f.situacao && p.situacao !== f.situacao) return false;
+          if (f.ano && String(p.ano) !== f.ano) return false;
+          return termos.every(function (t) { return p._txt.indexOf(t) >= 0; });
+        });
+        var u = new URLSearchParams();
+        campos.forEach(function (c) { if (f[c]) u.set(c, f[c]); });
+        history.replaceState(null, '', location.pathname + (u.toString() ? '?' + u : ''));
+        pagina = 1;
+        desenhar();
+      }
+
+      function desenhar() {
+        var total = Math.max(1, Math.ceil(filtrados.length / POR_PAGINA));
+        pagina = Math.min(pagina, total);
+        document.getElementById('contagem').innerHTML = '<strong>' + A.int(filtrados.length) + '</strong> ' + (filtrados.length === 1 ? 'proposição encontrada' : 'proposições encontradas');
+        var fatia = filtrados.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
+        document.getElementById('lista').innerHTML = fatia.length ? fatia.map(function (p) { return A.cartao(p); }).join('') : '<p class="vazio">Nenhuma proposição com esses filtros.</p>';
+        document.getElementById('paginas').innerHTML = total > 1
+          ? '<button type="button" class="btn btn--outline btn--sm" data-p="' + (pagina - 1) + '"' + (pagina === 1 ? ' disabled' : '') + '>← Anterior</button>' +
+            '<span>Página ' + pagina + ' de ' + total + '</span>' +
+            '<button type="button" class="btn btn--outline btn--sm" data-p="' + (pagina + 1) + '"' + (pagina === total ? ' disabled' : '') + '>Próxima →</button>'
+          : '';
+      }
+
+      document.getElementById('paginas').addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-p]'); if (!b || b.disabled) return;
+        pagina = +b.dataset.p; desenhar();
+        document.getElementById('filtros').scrollIntoView({ behavior: 'smooth' });
+      });
+      var espera;
+      el.q.addEventListener('input', function () { clearTimeout(espera); espera = setTimeout(aplicar, 200); });
+      campos.slice(1).forEach(function (c) { el[c].addEventListener('change', aplicar); });
+      document.getElementById('limpar').addEventListener('click', function () { campos.forEach(function (c) { el[c].value = ''; }); aplicar(); });
+
+      document.getElementById('csv').addEventListener('click', function () {
+        var col = ['tipo', 'numero', 'ano', 'data', 'ementa', 'autores', 'situacao', 'fase', 'temas', 'processo', 'link'];
+        var linhas = [col.join(';')].concat(filtrados.map(function (p) {
+          var v = { autores: p.autores.map(function (a) { return a.nome; }).join(', '), temas: p.temas.join(', '), link: A.linkCamara(p), data: A.data(p.data) };
+          return col.map(function (c) { return '"' + String(c in v ? v[c] : p[c]).replace(/"/g, '""') + '"'; }).join(';');
+        }));
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob(['﻿' + linhas.join('\n')], { type: 'text/csv;charset=utf-8' }));
+        a.download = 'proposicoes_santo_andre.csv';
+        a.click();
+      });
+
+      aplicar();
+    });
+  })();
+  </script>
+</body>
+</html>
