@@ -49,6 +49,7 @@ img { max-width: 100%; }
 .marca { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 900; font-size: 15px; letter-spacing: 0.02em; text-transform: uppercase; white-space: nowrap; }
 .marca__icone { display: grid; place-items: center; width: 30px; height: 30px; background: var(--yellow); color: #000; border-radius: var(--radius); font-size: 16px; font-weight: 900; }
 .marca em { font-style: italic; color: var(--yellow); }
+.marca__logo { display: block; width: 36px; height: 36px; flex-shrink: 0; }
 .nav__links { display: flex; align-items: center; gap: 22px; list-style: none; }
 .nav__links a { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); text-decoration: none; }
 .nav__links a:hover, .nav__links a[aria-current="page"] { color: var(--text); }
