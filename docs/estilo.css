@@ -75,6 +75,10 @@ img { max-width: 100%; }
 .hero__lede strong { color: var(--text); }
 .hero__meta { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 10px 24px; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
 .hero__meta span::before { content: "■ "; color: var(--yellow); }
+.hero__grade { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 48px; align-items: center; }
+.hero__grade .hero__title { font-size: clamp(36px, 5.4vw, 62px); max-width: none; }
+.hero__foto { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; border: 3px solid var(--yellow); border-radius: var(--radius); }
+@media (max-width: 920px) { .hero__grade { grid-template-columns: minmax(0, 1fr); gap: 28px; } }
 
 /* Seções */
 .secao { padding: 56px 0 8px; }
