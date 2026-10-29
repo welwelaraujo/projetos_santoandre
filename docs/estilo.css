@@ -61,6 +61,10 @@ img { max-width: 100%; }
 .footer__links { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: center; }
 .footer__links a { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); text-decoration: none; }
 .footer__links a:hover { color: var(--yellow); }
+.footer__credito { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-muted); text-align: center; overflow-wrap: anywhere; }
+.footer__credito strong { color: var(--text-2); }
+.footer__credito a { color: var(--yellow); text-decoration: none; }
+.footer__credito a:hover { text-decoration: underline; }
 .footer__info { text-align: right; font-size: 12px; color: var(--text-muted); max-width: 32ch; }
 
 /* Abertura */
