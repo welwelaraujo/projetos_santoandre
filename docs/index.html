@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="estilo.css?v=1" />
+  <link rel="stylesheet" href="estilo.css?v=2" />
 </head>
 <body>
 
@@ -53,6 +53,16 @@
       </div>
     </section>
 
+    <section class="secao" id="decisoes">
+      <div class="container">
+        <p class="section-label">Resultados</p>
+        <h2 class="secao__titulo">Decisões dos últimos 30 dias</h2>
+        <p class="secao__intro">Projetos, emendas, vetos e moções que tiveram desfecho recente: aprovados, transformados em lei, rejeitados, vetados ou retirados. Os requerimentos ficam na busca.</p>
+        <div class="chips" id="f-res" role="group" aria-label="Filtrar por resultado"></div>
+        <div class="lista" id="l-decisoes" style="margin-top:20px"></div>
+      </div>
+    </section>
+
     <section class="secao" id="novas">
       <div class="container">
         <p class="section-label">Protocoladas recentemente</p>
@@ -87,7 +97,7 @@
     </div>
   </footer>
 
-  <script src="app.js?v=1"></script>
+  <script src="app.js?v=2"></script>
   <script>
   (function () {
     var A = window.APP;
@@ -105,7 +115,7 @@
         ['Últimos 7 dias', semana.length, 'proposições protocoladas', 'var(--yellow)'],
         ['Projetos de lei em ' + ano, pls.length, pls.filter(function (p) { return p.situacao === 'Tramitando'; }).length + ' ainda tramitando', 'var(--c-pl)'],
         ['Aguardam plenário', pauta.length, 'na fila da Ordem do Dia', 'var(--yellow)'],
-        ['Requerimentos em ' + ano, P.filter(function (p) { return p.categoria === 'Requerimentos' && String(p.ano) === ano; }).length, 'pedidos e cobranças ao Executivo', 'var(--c-req)']
+        ['Leis em ' + ano, P.filter(function (p) { return p.desfecho && p.desfecho.codigo === 'lei' && (p.desfecho.data || '').slice(0, 4) === ano; }).length, 'projetos que viraram lei no ano', '#199e70']
       ].map(function (k) {
         return '<div class="kpi" style="--kpi-cor:' + k[3] + '"><div class="kpi__rotulo">' + k[0] + '</div><div class="kpi__valor">' + A.int(k[1]) + '</div><div class="kpi__sub">' + k[2] + '</div></div>';
       }).join('');
@@ -114,6 +124,30 @@
         ? pauta.filter(function (p) { return p.categoria !== 'Requerimentos'; }).slice(0, 10).map(function (p) { return A.cartao(p); }).join('')
         : '<p class="vazio">Nenhuma proposição aguardando plenário neste momento.</p>';
       document.getElementById('ver-pauta').textContent = 'Ver todas as ' + A.int(pauta.length) + ' →';
+
+      // Decisões recentes (desfecho com data nos últimos 30 dias), sem requerimentos.
+      var decisoes = P.filter(function (p) {
+        return p.desfecho && p.desfecho.data > diasAtras(30) && p.categoria !== 'Requerimentos' && p.desfecho.codigo !== 'acessorio';
+      }).sort(function (a, b) { return a.desfecho.data < b.desfecho.data ? 1 : -1; });
+      var fRes = document.getElementById('f-res'), grupoRes = '';
+      var nomesGrupo = [['', 'Todas'], ['ok', '✓ Aprovadas'], ['nao', '✕ Rejeitadas ou vetadas'], ['neutro', '↩ Retiradas ou sem votação']];
+      fRes.innerHTML = nomesGrupo.map(function (g) {
+        var q = decisoes.filter(function (p) { return !g[0] || A.GRUPO[p.desfecho.codigo] === g[0]; }).length;
+        return '<button type="button" data-v="' + g[0] + '" aria-pressed="' + (g[0] === '') + '">' + g[1] + ' · ' + q + '</button>';
+      }).join('');
+      fRes.addEventListener('click', function (e) {
+        var b = e.target.closest('button'); if (!b) return;
+        grupoRes = b.dataset.v;
+        fRes.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
+        desenhaDecisoes();
+      });
+      function desenhaDecisoes() {
+        var l = decisoes.filter(function (p) { return !grupoRes || A.GRUPO[p.desfecho.codigo] === grupoRes; });
+        document.getElementById('l-decisoes').innerHTML = l.length
+          ? l.slice(0, 15).map(function (p) { return A.cartao(p); }).join('') + (l.length > 15 ? '<p><a class="btn btn--outline" href="explorar.html?resultado=' + (grupoRes ? '_' + grupoRes : '') + '">Ver mais na busca →</a></p>' : '')
+          : '<p class="vazio">Nenhuma decisão registrada no período.</p>';
+      }
+      desenhaDecisoes();
 
       // Últimos 14 dias, agrupados por data de protocolo.
       var recentes = P.filter(function (p) { return p.data.slice(0, 10) > diasAtras(14); });

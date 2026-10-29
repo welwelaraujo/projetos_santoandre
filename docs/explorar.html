@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="estilo.css?v=1" />
+  <link rel="stylesheet" href="estilo.css?v=2" />
 </head>
 <body>
 
@@ -44,6 +44,7 @@
           <label>Autor<select id="autor"></select></label>
           <label>Tema<select id="tema"></select></label>
           <label>Situação<select id="situacao"></select></label>
+          <label>Resultado<select id="resultado"></select></label>
           <label>Ano<select id="ano"></select></label>
         </form>
         <div class="resumo-busca">
@@ -72,11 +73,11 @@
     </div>
   </footer>
 
-  <script src="app.js?v=1"></script>
+  <script src="app.js?v=2"></script>
   <script>
   (function () {
     var A = window.APP, POR_PAGINA = 30, pagina = 1, filtrados = [];
-    var campos = ['q', 'categoria', 'tipo', 'autor', 'tema', 'situacao', 'ano'];
+    var campos = ['q', 'categoria', 'tipo', 'autor', 'tema', 'situacao', 'resultado', 'ano'];
     var el = {};
     campos.forEach(function (c) { el[c] = document.getElementById(c); });
 
@@ -107,6 +108,9 @@
       var temas = contar(P, function (p) { return p.temas; });
       opcoes(el.tema, 'Todos', Object.keys(temas).sort().map(function (t) { return [t, t + ' (' + temas[t] + ')']; }).concat([['__sem', 'Sem tema identificado']]));
       opcoes(el.situacao, 'Todas', [['pauta', 'Aguarda plenário']].concat(Object.keys(contar(P, function (p) { return p.situacao; })).sort().map(function (s) { return [s, s]; })));
+      var qRes = contar(P, function (p) { return p.desfecho ? p.desfecho.codigo : []; });
+      opcoes(el.resultado, 'Todos', [['_ok', '✓ Aprovados (todos)'], ['_nao', '✕ Rejeitados ou vetados (todos)']].concat(
+        A.RESULTADOS.filter(function (r) { return qRes[r.codigo]; }).map(function (r) { return [r.codigo, r.nome + ' (' + qRes[r.codigo] + ')']; })));
       opcoes(el.ano, 'Todos', Object.keys(contar(P, function (p) { return p.ano; })).sort().reverse().map(function (a) { return [a, a]; }));
 
       var url = new URLSearchParams(location.search);
@@ -122,6 +126,10 @@
           if (f.autor && (A.coletiva(p) || !p.autores.some(function (a) { return a.ids === f.autor; }))) return false;
           if (f.tema === '__sem' ? p.temas.length : f.tema && p.temas.indexOf(f.tema) < 0) return false;
           if (f.situacao === 'pauta' ? !A.naPauta(p) : f.situacao && p.situacao !== f.situacao) return false;
+          if (f.resultado) {
+            var cod = p.desfecho ? p.desfecho.codigo : '';
+            if (f.resultado.charAt(0) === '_' ? A.GRUPO[cod] !== f.resultado.slice(1) : cod !== f.resultado) return false;
+          }
           if (f.ano && String(p.ano) !== f.ano) return false;
           return termos.every(function (t) { return p._txt.indexOf(t) >= 0; });
         });
@@ -156,9 +164,10 @@
       document.getElementById('limpar').addEventListener('click', function () { campos.forEach(function (c) { el[c].value = ''; }); aplicar(); });
 
       document.getElementById('csv').addEventListener('click', function () {
-        var col = ['tipo', 'numero', 'ano', 'data', 'ementa', 'autores', 'situacao', 'fase', 'temas', 'processo', 'link'];
+        var col = ['tipo', 'numero', 'ano', 'data', 'ementa', 'autores', 'situacao', 'resultado', 'norma', 'decidido_em', 'fase', 'temas', 'processo', 'link'];
         var linhas = [col.join(';')].concat(filtrados.map(function (p) {
-          var v = { autores: p.autores.map(function (a) { return a.nome; }).join(', '), temas: p.temas.join(', '), link: A.linkCamara(p), data: A.data(p.data) };
+          var d = p.desfecho || {};
+          var v = { resultado: d.rotulo || '', norma: d.lei || '', decidido_em: A.data(d.data || ''), autores: p.autores.map(function (a) { return a.nome; }).join(', '), temas: p.temas.join(', '), link: A.linkCamara(p), data: A.data(p.data) };
           return col.map(function (c) { return '"' + String(c in v ? v[c] : p[c]).replace(/"/g, '""') + '"'; }).join(';');
         }));
         var a = document.createElement('a');

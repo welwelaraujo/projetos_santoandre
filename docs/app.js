@@ -48,10 +48,28 @@
     }).join(', ');
   }
 
+  // Resultado das arquivadas, lido do histórico de tramitação pelo coletor.
+  var RESULTADOS = [
+    { codigo: 'lei', nome: 'Virou lei', grupo: 'ok' },
+    { codigo: 'aprovado', nome: 'Aprovado', grupo: 'ok' },
+    { codigo: 'veto_derrubado', nome: 'Veto derrubado', grupo: 'ok' },
+    { codigo: 'vetado', nome: 'Aprovado, mas vetado', grupo: 'nao' },
+    { codigo: 'veto_mantido', nome: 'Veto mantido', grupo: 'nao' },
+    { codigo: 'rejeitado', nome: 'Rejeitado', grupo: 'nao' },
+    { codigo: 'retirado', nome: 'Retirado pelo autor', grupo: 'neutro' },
+    { codigo: 'sem_votacao', nome: 'Arquivado sem votação', grupo: 'neutro' }
+  ];
+  var GRUPO = {}, ICONE = { ok: '✓ ', nao: '✕ ', neutro: '↩ ' };
+  RESULTADOS.forEach(function (r) { GRUPO[r.codigo] = r.grupo; });
+
   function situacao(p) {
     if (naPauta(p)) return '<span class="sit sit--pauta" title="' + esc(p.fase) + '">Aguarda plenário</span>';
-    var cls = p.situacao === 'Tramitando' ? ' sit--tramitando' : '';
-    return '<span class="sit' + cls + '">' + esc(p.situacao) + '</span>';
+    if (p.situacao === 'Tramitando') return '<span class="sit sit--tramitando">Tramitando</span>';
+    var d = p.desfecho;
+    if (!d || d.codigo === 'acessorio') return '<span class="sit">' + esc(p.situacao) + '</span>';
+    var g = GRUPO[d.codigo] || 'neutro';
+    return '<span class="sit sit--' + g + '" title="' + esc(d.data ? 'Em ' + data(d.data) : '') + '">' +
+      ICONE[g] + esc(d.rotulo) + (d.lei ? ' · ' + esc(d.lei) : '') + '</span>';
   }
 
   function cartao(p, opc) {
@@ -67,7 +85,8 @@
       (p.resumo_ia ? '<p class="prop__resumo">' + esc(p.resumo_ia) + '</p>' : '') +
       (temas ? '<div class="temas">' + temas + '</div>' : '') +
       '<div class="prop__pe"><span class="prop__autor">' + autores(p) + '</span>' +
-      (p.fase ? '<span class="prop__fase">Fase: ' + esc(p.fase) + '</span>' : '') +
+      (p.fase && p.situacao === 'Tramitando' ? '<span class="prop__fase">Fase: ' + esc(p.fase) + '</span>' : '') +
+      (p.desfecho && p.desfecho.data ? '<span class="prop__fase">Decidido em ' + data(p.desfecho.data) + '</span>' : '') +
       '<a class="prop__link" href="' + linkCamara(p) + '" target="_blank" rel="noopener">Ver na Câmara ↗</a></div>' +
       '</article>';
   }
@@ -117,7 +136,7 @@
   });
 
   window.APP = {
-    CATEGORIAS: CATEGORIAS, COR: COR, MESES: MESES,
+    CATEGORIAS: CATEGORIAS, COR: COR, MESES: MESES, RESULTADOS: RESULTADOS, GRUPO: GRUPO,
     esc: esc, int: int, data: data, dataHora: dataHora, diaISO: diaISO, semAcento: semAcento, frase: frase,
     naPauta: naPauta, coletiva: coletiva, cartao: cartao, carregar: carregar, legenda: legenda, linkCamara: linkCamara
   };

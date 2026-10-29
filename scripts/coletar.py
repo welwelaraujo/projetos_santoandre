@@ -3,6 +3,8 @@
 Percorre a listagem "consulta-producao.aspx?tipo=X&ano_proposicao=Y" de cada tipo, 100 itens por
 página (postback do ASP.NET), e grava docs/dados/proposicoes.json. Compara com a coleta anterior
 para registrar proposições novas e mudanças de situação/fase em docs/dados/movimentacoes.json.
+Para as arquivadas, lê o histórico de tramitação e classifica o desfecho (aprovada, virou lei,
+rejeitada, retirada, veto mantido/derrubado, arquivada sem votação).
 
 Uso: python scripts/coletar.py [--anos 2025 2026]
 """
@@ -12,6 +14,7 @@ import json
 import re
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -131,6 +134,78 @@ def ler_itens(pagina, tipo):
     return [i for i in itens if i["id"]]
 
 
+def ler_tramitacao(pagina):
+    """Etapas do histórico de tramitação (mais recente primeiro) da página processo.aspx."""
+    corpo = pagina.split('id="ContentPlaceHolder1_tb_tramitacao"', 1)[-1].split("</tbody>", 1)[0]
+    etapas = []
+    for bloco in re.split(r"<tr>\s*<td>\s*<table>", corpo)[1:]:
+        def rotulo(nome):
+            m = re.search(r"<strong>\s*" + nome + r":?\s*</strong>:?(.*?)</td>", bloco, re.S)
+            return limpar(m.group(1)) if m else ""
+        docs = [limpar(d) for d in re.findall(r"<a [^>]*href='/Arquivo/[^>]*>(.*?)</a>", bloco, re.S)]
+        etapas.append({
+            "recebimento": rotulo("Recebimento"),
+            "envio": rotulo("Envio"),
+            "fase": rotulo("Fase"),
+            "acao": rotulo("Ação"),
+            "complemento": rotulo("Complemento da Ação"),
+            "docs": [d for d in docs if d and d != "Despacho Digital"],
+        })
+    return etapas
+
+
+def data_etapa(e):
+    m = re.search(r"(\d{2})/(\d{2})/(\d{4})", e["envio"] or e["recebimento"])
+    return f"{m.group(3)}-{m.group(2)}-{m.group(1)}" if m else ""
+
+
+NORMA_RE = re.compile(r"\b(LEI|RESOLUÇÃO|DECRETO LEGISLATIVO) N[º°O]\.? ?(\d[\d.]*[/-]\d{2,4})")
+
+
+def desfecho(p, etapas):
+    """Resultado de uma proposição a partir do histórico: o que aconteceu antes de ser arquivada."""
+    cronologia = list(reversed(etapas))
+    textos = [(e, (e["acao"] + " " + e["complemento"]).upper(), " ".join(e["docs"]).upper()) for e in cronologia]
+    norma = next((m for _, _, d in textos for m in [NORMA_RE.search(d)] if m), None)
+    lei = f"{norma.group(1).capitalize()} nº {norma.group(2)}" if norma else ""
+    if p["tipo_id"] == 275:
+        return {"codigo": "acessorio", "rotulo": "Documento do prefeito (razões do veto)", "data": "", "lei": ""}
+    res = None
+    for e, t, d in textos:
+        if re.search(r"VETO MANTIDO", t):
+            res = ("veto_mantido", "Veto mantido", e)
+        elif re.search(r"VETO REJEITADO", t):
+            res = ("veto_derrubado", "Veto derrubado", e)
+        elif re.search(r"\bVETO (TOTAL|PARCIAL)\b", t) and p["categoria"] == "Projetos de lei":
+            res = ("vetado", "Aprovado, mas vetado pelo prefeito" if "TOTAL" in t else "Aprovado com veto parcial", e)
+        elif re.search(r"REJEITAD", t):
+            res = ("rejeitado", "Rejeitado por ausência do autor" if "AUSÊNCIA" in t else "Rejeitado", e)
+        elif re.search(r"RETIRAD|DEVOLVIDO A PEDIDO", t) or "RETIRADA" in d:
+            res = ("retirado", "Retirado pelo autor", e)
+        elif re.search(r"APROVAD", t) and not (res and res[0] in ("vetado", "veto_mantido", "veto_derrubado")):
+            res = ("aprovado", "Aprovado", e)
+        elif re.search(r"SANCIONAD|^PROMULGADO", t):
+            res = ("lei", "Virou lei", e)
+    if p["tipo_id"] == 162:
+        e = next((e for e, t, _ in reversed(textos) if re.search(r"VETO (MANTIDO|REJEITADO)", t)), None)
+        if e:
+            mantido = "MANTIDO" in e["acao"].upper()
+            res = ("veto_mantido", "Veto mantido", e) if mantido else ("veto_derrubado", "Veto derrubado: a lei vale", e)
+    elif lei and p["categoria"] == "Decretos e resoluções":
+        res = ("aprovado", "Aprovado", res[2] if res else cronologia[-1])
+    elif lei.startswith("Lei") or (res and res[0] == "lei"):
+        derrubado = any("VETO REJEITADO" in t or "VETOS TOTAIS REJEITADOS" in d for _, t, d in textos)
+        e = res[2] if res else cronologia[-1]
+        res = ("lei", "Virou lei" + (" após derrubada do veto" if derrubado else ""), e)
+    if res is None:
+        motivo = next(("Arquivado por parecer de inconstitucionalidade" for _, t, d in textos if "INCONSTITUCIONAL" in t + d), "Arquivado sem votação")
+        return {"codigo": "sem_votacao", "rotulo": motivo, "data": data_etapa(cronologia[-1]) if cronologia else "", "lei": ""}
+    rotulo = res[1]
+    if res[0] == "aprovado" and p["tipo_id"] == 146:
+        rotulo += " · respondido" if any("RESPOSTA RECEBIDA" in t for _, t, _ in textos) else " · sem resposta registrada"
+    return {"codigo": res[0], "rotulo": rotulo, "data": data_etapa(res[2]), "lei": lei}
+
+
 def coletar_tipo_ano(sessao, tipo, ano):
     url = f"{BASE}consulta-producao.aspx?tipo={tipo}&ano_proposicao={ano}"
     pagina = sessao.get(url, timeout=90).text
@@ -216,6 +291,23 @@ def main():
                 "de": {"situacao": antigo["situacao"], "fase": antigo["fase"]},
                 "para": {"situacao": p["situacao"], "fase": p["fase"]},
             })
+        if antigo and antigo.get("desfecho") and antigo["situacao"] == p["situacao"]:
+            p["desfecho"] = antigo["desfecho"]
+
+    # O resultado (aprovado, rejeitado, retirado...) só aparece no histórico de tramitação,
+    # então a página de detalhe é lida uma vez por proposição arquivada.
+    pendentes = [p for p in atuais.values() if p["situacao"] == "Arquivado" and not p.get("desfecho")]
+    print(f"buscando desfecho de {len(pendentes)} proposições arquivadas")
+
+    def detalhar(p):
+        url = f"{BASE}processo.aspx?id={p['id']}&tipo={p['tipo_id']}&ano_proposicao={p['ano']}"
+        try:
+            p["desfecho"] = desfecho(p, ler_tramitacao(sessao.get(url, timeout=90).text))
+        except requests.RequestException as erro:
+            print(f"falha no detalhe {p['id']}: {erro}", file=sys.stderr)
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        list(executor.map(detalhar, pendentes))
 
     proposicoes = sorted(atuais.values(), key=lambda p: (p["data"], p["id"]), reverse=True)
     gravar("proposicoes.json", {"atualizado_em": agora, "fonte": BASE, "proposicoes": proposicoes})

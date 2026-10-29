@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="estilo.css?v=1" />
+  <link rel="stylesheet" href="estilo.css?v=2" />
 </head>
 <body>
 
@@ -50,6 +50,18 @@
       </div>
     </section>
 
+    <section class="secao" id="resultados">
+      <div class="container">
+        <p class="section-label">Resultado</p>
+        <h2 class="secao__titulo">O que aconteceu com os projetos de lei</h2>
+        <p class="secao__intro">Projetos de lei, de resolução e de decreto legislativo de cada vereador, separados pelo desfecho registrado na tramitação. Vale o período escolhido acima. Projetos de autoria coletiva ficam de fora.</p>
+        <div class="cartao">
+          <div class="legenda" id="leg-res"></div>
+          <div class="ranking" id="ranking-res"></div>
+        </div>
+      </div>
+    </section>
+
     <section class="secao">
       <div class="container">
         <p class="section-label">Em números</p>
@@ -72,7 +84,7 @@
     </div>
   </footer>
 
-  <script src="app.js?v=1"></script>
+  <script src="app.js?v=2"></script>
   <script>
   (function () {
     var A = window.APP, CAT = A.CATEGORIAS;
@@ -107,6 +119,40 @@
         estado.cats = CAT.map(function (c) { return c.nome; }).filter(function (n) { return fCat.querySelector('[data-v="' + n + '"]').getAttribute('aria-pressed') === 'true'; });
         desenhar();
       });
+
+      // Desfecho dos projetos (lei, resolução, decreto legislativo) por vereador.
+      var GRUPOS_RES = [
+        { id: 'ok', nome: 'Aprovado / virou lei', cor: '#199e70' },
+        { id: 'tram', nome: 'Ainda tramitando', cor: '#b5880f' },
+        { id: 'nao', nome: 'Rejeitado ou vetado', cor: '#e66767' },
+        { id: 'neutro', nome: 'Retirado ou arquivado sem votação', cor: '#6b6b6b' }
+      ];
+      document.getElementById('leg-res').innerHTML = GRUPOS_RES.map(function (g) { return '<span><i style="background:' + g.cor + '"></i>' + g.nome + '</span>'; }).join('');
+      function desenharResultados() {
+        var por = {};
+        P.forEach(function (p) {
+          if (p.categoria !== 'Projetos de lei' && p.categoria !== 'Decretos e resoluções') return;
+          if (estado.ano && String(p.ano) !== estado.ano) return;
+          var g = p.situacao === 'Tramitando' ? 'tram' : (p.desfecho ? A.GRUPO[p.desfecho.codigo] : null);
+          if (!g) return;
+          p.autores.forEach(function (a) {
+            if (!/^Ver\./i.test(a.nome)) return;
+            var r = por[a.ids] = por[a.ids] || { id: a.ids, nome: a.nome, total: 0, g: {} };
+            r.total++; r.g[g] = (r.g[g] || 0) + 1;
+          });
+        });
+        var lista = Object.keys(por).map(function (k) { return por[k]; })
+          .sort(function (a, b) { return ((b.g.ok || 0) - (a.g.ok || 0)) || (b.total - a.total); });
+        var max = Math.max.apply(null, lista.map(function (r) { return r.total; }).concat([1]));
+        document.getElementById('ranking-res').innerHTML = lista.map(function (r) {
+          var segs = GRUPOS_RES.filter(function (g) { return r.g[g.id]; }).map(function (g) {
+            return '<i style="width:' + (r.g[g.id] / max * 100) + '%;background:' + g.cor + '" data-dica="<b>' + A.esc(r.nome) + '</b><br>' + g.nome + ': ' + r.g[g.id] + ' de ' + r.total + '"></i>';
+          }).join('');
+          return '<a class="rk" href="explorar.html?autor=' + r.id + '&categoria=Projetos%20de%20lei' + (estado.ano ? '&ano=' + estado.ano : '') + '">' +
+            '<span class="rk__nome">' + A.esc(r.nome.replace(/^Ver\. /, '')) + '</span><span class="rk__barra">' + segs + '</span>' +
+            '<span class="rk__total" title="aprovados / apresentados">' + (r.g.ok || 0) + '/' + r.total + '</span></a>';
+        }).join('') || '<p class="vazio">Sem projetos no período.</p>';
+      }
 
       function desenhar() {
         var por = {};
@@ -150,6 +196,8 @@
           }).join('') + '</tbody>';
       }
       desenhar();
+      desenharResultados();
+      fAno.addEventListener('click', desenharResultados);
     });
   })();
   </script>
