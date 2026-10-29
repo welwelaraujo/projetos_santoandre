@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="estilo.css?v=7" />
+  <link rel="stylesheet" href="estilo.css?v=9" />
 </head>
 <body>
 
@@ -156,10 +156,40 @@
       if (req) partes.push(req + (req > 1 ? ' requerimentos e moções' : ' requerimento ou moção'));
       return partes.join(' · ');
     }
+    // Resultado de cada item na sessão (calculado pelo coletor a partir da tramitação e das pautas seguintes).
+    var RES_SESSAO = {
+      aprovado: ['ok', '✓ Aprovado'], rejeitado: ['nao', '✕ Rejeitado'], veto_mantido: ['nao', '✕ Veto mantido'],
+      veto_derrubado: ['ok', '✓ Veto derrubado'], retirado: ['neutro', '↩ Retirado'], adiado: ['neutro', '⏸ Adiado'],
+      aguardando: ['neutro', 'Aguardando registro'], sem_info: ['neutro', 'Sem registro']
+    };
+    var PESO = { aprovado: 0, rejeitado: 0, veto_mantido: 0, veto_derrubado: 0, retirado: 1, adiado: 2, aguardando: 3, sem_info: 3 };
+    function seloResultado(item) {
+      var r = item.resultado && RES_SESSAO[item.resultado.codigo];
+      return r ? '<span class="sit sit--' + r[0] + '">' + r[1] + (item.resultado.codigo === 'aprovado' && /votação/.test(item.votacao) && item.votacao !== 'leitura e votação' ? ' em ' + item.votacao.replace(' votação', '') : '') + '</span>' : '';
+    }
+    function placar(s) {
+      var pr = (s.placar || {}).projetos, rq = (s.placar || {}).requerimentos;
+      if (!pr && !rq) return '';
+      function n(o, k) { return (o && o[k]) || 0; }
+      function linha(o, rotulo) {
+        if (!o) return '';
+        var votados = n(o, 'aprovado') + n(o, 'rejeitado') + n(o, 'veto_mantido') + n(o, 'veto_derrubado');
+        var det = [];
+        if (n(o, 'aprovado') + n(o, 'veto_derrubado')) det.push(n(o, 'aprovado') + n(o, 'veto_derrubado') + ' aprovados');
+        if (n(o, 'rejeitado') + n(o, 'veto_mantido')) det.push(n(o, 'rejeitado') + n(o, 'veto_mantido') + ' rejeitados');
+        var resto = [];
+        if (n(o, 'adiado')) resto.push('<b>' + n(o, 'adiado') + '</b> adiados');
+        if (n(o, 'retirado')) resto.push(n(o, 'retirado') + ' retirados');
+        if (n(o, 'sem_info') + n(o, 'aguardando')) resto.push(n(o, 'sem_info') + n(o, 'aguardando') + ' ainda sem registro');
+        return '<div class="placar__linha"><span class="placar__rot">' + rotulo + '</span><span><b>' + votados + '</b> votados' + (det.length ? ' (' + det.join(', ') + ')' : '') +
+          (resto.length ? ' · ' + resto.join(' · ') : '') + '</span></div>';
+      }
+      return '<div class="placar">' + linha(pr, 'Projetos e vetos') + linha(rq, 'Requerimentos e moções') + '</div>';
+    }
     function linhaItem(item, D) {
       var p = item.proposicao_id && D.porId[item.proposicao_id];
       var nome = A.esc(item.tipo) + (item.numero ? ' nº ' + item.numero + '/' + item.ano : '');
-      return '<li><span class="sessao__voto">' + A.esc(item.votacao) + (item.adiada ? ' (adiada)' : '') + '</span>' +
+      return '<li>' + (item.resultado ? seloResultado(item) : '') + '<span class="sessao__voto">' + A.esc(item.votacao) + (item.adiada ? ' (já adiada antes)' : '') + '</span>' +
         '<strong>' + (p ? '<a href="' + A.linkCamara(p) + '" target="_blank" rel="noopener">' + nome + '</a>' : nome) + '</strong>' +
         (item.autor ? ' <span class="sessao__autor">· ' + A.esc(item.autor) + '</span>' : '') +
         '<span class="sessao__ementa">' + A.esc(A.frase(item.ementa).slice(0, 160)) + (item.ementa.length > 160 ? '…' : '') + '</span>' +
@@ -170,8 +200,11 @@
       var aoVivo = ini && agora >= ini - 15 * 60000 && agora < ini + DURACAO;
       var pauta = s.pauta || { itens: [], temas: {} };
       var projetos = pauta.itens.filter(function (i) { return !/Requerimento|Moção/.test(i.tipo); });
-      // Itens adiados se repetem toda semana; o que de fato foi a voto vem primeiro.
-      projetos.sort(function (a, b) { return (a.adiada - b.adiada) || (a.ordem - b.ordem); });
+      // Votados primeiro, depois retirados, adiados e sem registro.
+      projetos.sort(function (a, b) {
+        var pa = a.resultado ? PESO[a.resultado.codigo] : a.adiada, pb = b.resultado ? PESO[b.resultado.codigo] : b.adiada;
+        return (pa - pb) || (a.ordem - b.ordem);
+      });
       var docs = (s.docs || []).filter(function (d) { return /ordem do dia/i.test(d.titulo); });
       var video = modo === 'ultima'
         ? (s.video ? '<a class="btn btn--yellow btn--sm" href="https://www.youtube.com/watch?v=' + s.video + '" target="_blank" rel="noopener">▶ Assistir à gravação</a>' : '<a class="btn btn--outline btn--sm" href="' + S.canal + '" target="_blank" rel="noopener">▶ Gravações no YouTube</a>')
@@ -179,7 +212,7 @@
       var pres = s.presenca && s.presenca.total ? '<p class="sessao__pres"><strong>' + s.presenca.presentes + ' de ' + s.presenca.total + '</strong> vereadores presentes' +
         (s.presenca.ausentes.length ? ' · Faltas: ' + s.presenca.ausentes.map(function (a) { return A.esc(a.nome) + (a.situacao !== 'Ausente' ? ' (' + A.esc(a.situacao.toLowerCase()) + (a.motivo ? ': ' + A.esc(a.motivo.toLowerCase()) : '') + ')' : ''); }).join(', ') : '') + '</p>' : '';
       var corpoPauta = pauta.itens.length
-        ? '<p class="sessao__conta">Ordem do Dia: ' + contagem(pauta.itens) + '</p>' + resumoTemas(pauta) +
+        ? '<p class="sessao__conta">Ordem do Dia: ' + contagem(pauta.itens) + '</p>' + (modo === 'ultima' ? placar(s) : '') + resumoTemas(pauta) +
           (projetos.length ? '<details class="sessao__itens"' + (modo === 'proxima' ? ' open' : '') + '><summary>' + (modo === 'ultima' ? 'Projetos pautados e situação hoje' : 'Projetos que vão a voto') + ' (' + projetos.length + ')</summary><ul>' +
             projetos.map(function (i) { return linhaItem(i, D); }).join('') + '</ul></details>' : '')
         : '<p class="sessao__conta">' + (s.previsto ? 'Previsão pelo calendário. A pauta ainda não foi publicada.' : 'A Ordem do Dia ainda não foi publicada.') + '</p>';

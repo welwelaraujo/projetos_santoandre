@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="estilo.css?v=7" />
+  <link rel="stylesheet" href="estilo.css?v=9" />
 </head>
 <body>
 
@@ -56,8 +56,12 @@
       <div class="container">
         <p class="section-label">Resultado</p>
         <h2 class="secao__titulo">O que aconteceu com os projetos de lei</h2>
-        <p class="secao__intro">Projetos de lei, de resolução e de decreto legislativo de cada vereador, separados pelo desfecho registrado na tramitação. Vale o período escolhido acima. Projetos de autoria coletiva ficam de fora.</p>
-        <div class="cartao">
+        <p class="secao__intro">Quantos projetos de cada vereador foram aprovados, seguem tramitando, foram rejeitados ou vetados, ou foram retirados. Contam os projetos em que ele é autor ou coautor (até cinco autores), no período escolhido acima. Resoluções (como criar ou prorrogar comissões) e decretos legislativos (como títulos de cidadão) ficam em uma aba separada, porque quase sempre são aprovados e inflariam a conta.</p>
+        <div class="chips" id="f-res-tipo" role="group" aria-label="Tipo de proposição">
+          <button type="button" data-v="lei" aria-pressed="true">Projetos de lei</button>
+          <button type="button" data-v="outros" aria-pressed="false">Resoluções e decretos legislativos</button>
+        </div>
+        <div class="cartao" style="margin-top:12px">
           <div class="legenda" id="leg-res"></div>
           <div class="ranking" id="ranking-res"></div>
         </div>
@@ -131,10 +135,20 @@
         { id: 'neutro', nome: 'Retirado ou arquivado sem votação', cor: '#6b6b6b' }
       ];
       document.getElementById('leg-res').innerHTML = GRUPOS_RES.map(function (g) { return '<span><i style="background:' + g.cor + '"></i>' + g.nome + '</span>'; }).join('');
+      // Projetos de lei: ordinários, complementares e emendas à Lei Orgânica (sem substitutivos, que repetem um PL).
+      var TIPOS_RES = { lei: [161, 205, 168], outros: [163, 167] };
+      var tipoRes = 'lei';
+      var fResTipo = document.getElementById('f-res-tipo');
+      fResTipo.addEventListener('click', function (e) {
+        var b = e.target.closest('button'); if (!b) return;
+        tipoRes = b.dataset.v;
+        fResTipo.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
+        desenharResultados();
+      });
       function desenharResultados() {
         var por = {};
         P.forEach(function (p) {
-          if (p.categoria !== 'Projetos de lei' && p.categoria !== 'Decretos e resoluções') return;
+          if (TIPOS_RES[tipoRes].indexOf(p.tipo_id) < 0) return;
           if (estado.ano && String(p.ano) !== estado.ano) return;
           var g = p.situacao === 'Tramitando' ? 'tram' : (p.desfecho ? A.GRUPO[p.desfecho.codigo] : null);
           if (!g) return;
@@ -151,9 +165,10 @@
           var segs = GRUPOS_RES.filter(function (g) { return r.g[g.id]; }).map(function (g) {
             return '<i style="width:' + (r.g[g.id] / max * 100) + '%;background:' + g.cor + '" data-dica="<b>' + A.esc(r.nome) + '</b><br>' + g.nome + ': ' + r.g[g.id] + ' de ' + r.total + '"></i>';
           }).join('');
-          return '<a class="rk" href="explorar.html?autor=' + r.id + '&categoria=Projetos%20de%20lei' + (estado.ano ? '&ano=' + estado.ano : '') + '">' +
-            '<span class="rk__nome">' + A.esc(r.nome.replace(/^Ver\. /, '')) + '</span><span class="rk__barra">' + segs + '</span>' +
-            '<span class="rk__total" title="aprovados / apresentados">' + (r.g.ok || 0) + '/' + r.total + '</span></a>';
+          var dica = '<b>' + A.esc(r.nome) + '</b><br>' + GRUPOS_RES.map(function (g) { return g.nome + ': ' + (r.g[g.id] || 0); }).join('<br>');
+          return '<a class="rk rk--res" href="explorar.html?autor=' + r.id + '&categoria=' + encodeURIComponent(tipoRes === 'lei' ? 'Projetos de lei' : 'Decretos e resoluções') + (estado.ano ? '&ano=' + estado.ano : '') + '">' +
+            '<span class="rk__nome" data-dica="' + dica.replace(/"/g, '&quot;') + '">' + A.esc(r.nome.replace(/^Ver\. /, '')) + '</span><span class="rk__barra">' + segs + '</span>' +
+            '<span class="rk__total">' + (r.g.ok || 0) + ' de ' + r.total + '<small>aprovados</small></span></a>';
         }).join('') || '<p class="vazio">Sem projetos no período.</p>';
       }
 

@@ -117,7 +117,7 @@ def itens_requerimentos(texto):
 def presenca(sessao, ses_id):
     pagina = sessao.get(f"{PORTAL}sessao-parlamentares.aspx?id={ses_id}", timeout=90).text
     t = limpar(re.sub(r"<script.*?</script>|<style.*?</style>", "", pagina, flags=re.S))
-    t = t[t.find("Horário"):t.find("Consultas", t.find("Horário"))]
+    t = t[t.find("Horário"):t.find("Consultas", t.find("Horário"))].strip()
     registros = []
     for m in re.finditer(r"(Ver\. .+?) (Presente|Falta Justificada|Falta|Ausente|Licen\w+)(?: Justificativa: (.+?))?(?= Ver\. |$)", t):
         registros.append({"nome": m.group(1).replace("Ver. ", ""), "situacao": m.group(2), "motivo": (m.group(3) or "").strip()})
@@ -146,7 +146,114 @@ def videos(sessao):
     return achados
 
 
-def atualizar(sessao, proposicoes, temas, destino, agora):
+def resultado_da_etapa(acao):
+    a = acao.upper()
+    for padrao, codigo in (("VETO MANTIDO", "veto_mantido"), ("VETO REJEITADO", "veto_derrubado"), ("REJEITAD", "rejeitado"),
+                           ("RETIRAD", "retirado"), ("APROVAD", "aprovado"), ("ADIAD", "adiado")):
+        if padrao in a:
+            return codigo
+    return None
+
+
+def resultados(sessao, passadas, todas, indice, extra, apoio, hoje):
+    """Marca cada item das sessões já realizadas como votado (com o resultado) ou adiado.
+
+    A Câmara registra na tramitação a ação de votação ("Proposição Aprovada"...) com data entre o
+    dia da sessão e a sessão seguinte; quando o item é adiado nada é registrado e ele segue na fase
+    da Ordem do Dia. Itens antigos (fora da legislatura coletada) têm o id buscado na listagem do ano.
+    """
+    from concurrent.futures import ThreadPoolExecutor
+
+    def ident(item):
+        for t in item.get("tipo_ids", []):
+            chave = (t, item["numero"], item["ano"])
+            if chave in indice:
+                return indice[chave], t
+            if f"{t}|{item['ano']}|{item['numero']}" in extra:
+                return tuple(extra[f"{t}|{item['ano']}|{item['numero']}"])
+        return None
+
+    faltam = {(t, i["ano"]) for s in passadas for i in s["pauta"]["itens"] if i["numero"] and not ident(i)
+              for t in i.get("tipo_ids", [])[:1] if i["ano"] < 2025}
+    for tipo, ano in sorted(faltam):
+        try:
+            for p in apoio["listar"](sessao, tipo, ano):
+                extra[f"{tipo}|{ano}|{p['numero']}"] = [p["id"], tipo]
+        except Exception as erro:
+            print(f"listagem {tipo}/{ano}: {erro}")
+
+    alvos = {}
+    for s in passadas:
+        for item in s["pauta"]["itens"]:
+            achado = ident(item)
+            item["_ref"] = list(achado) if achado else None
+            if achado:
+                alvos[tuple(achado)] = None
+
+    def tramitar(chave):
+        pid, tipo = chave
+        ano = next(i["ano"] for s in passadas for i in s["pauta"]["itens"] if i.get("_ref") == [pid, tipo])
+        url = f"{apoio['base']}processo.aspx?id={pid}&tipo={tipo}&ano_proposicao={ano}"
+        try:
+            alvos[chave] = apoio["tramitacao"](sessao.get(url, timeout=90).text)
+        except Exception as erro:
+            print(f"tramitação {pid}: {erro}")
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        list(executor.map(tramitar, list(alvos)))
+
+    def data_iso(texto):
+        m = re.search(r"(\d{2})/(\d{2})/(\d{4})", texto or "")
+        return f"{m.group(3)}-{m.group(2)}-{m.group(1)}" if m else ""
+
+    ordem = sorted(passadas, key=lambda s: (s["data"], s["hora"]))
+    for n, s in enumerate(ordem):
+        fim = next((o["data"] for o in ordem[n + 1:] if o["data"] > s["data"]), "9999")
+        # Item pautado de manhã e de novo à tarde no mesmo dia: de manhã ficou para depois.
+        tarde = {(i["tipo"], i["numero"], i["ano"]) for o in ordem[n + 1:] if o["data"] == s["data"] for i in o["pauta"]["itens"]}
+        # Pautas publicadas depois desta sessão (inclusive as já agendadas), para a pista de reserva.
+        depois = [o for o in todas if (o["data"], o["hora"]) > (s["data"], s["hora"]) and o.get("pauta")]
+        for item in s["pauta"]["itens"]:
+            ref = item.pop("_ref", None)
+            etapas = alvos.get(tuple(ref)) if ref else None
+            if etapas is None:
+                # Sem tramitação online (projetos anteriores a 2019): se o item volta numa pauta seguinte,
+                # foi adiado; se volta já em 2ª votação, foi aprovado em 1ª.
+                volta = [i["votacao"] for o in depois for i in o["pauta"]["itens"]
+                         if (i["tipo"], i["numero"], i["ano"]) == (item["tipo"], item["numero"], item["ano"])]
+                if not volta:
+                    item["resultado"] = {"codigo": "sem_info"}
+                elif item["votacao"] == "1ª votação" and "2ª votação" in volta:
+                    item["resultado"] = {"codigo": "aprovado"}
+                else:
+                    item["resultado"] = {"codigo": "adiado"}
+                continue
+            if (item["tipo"], item["numero"], item["ano"]) in tarde:
+                item["resultado"] = {"codigo": "adiado"}
+                continue
+            voto = None
+            for e in etapas:
+                quando = data_iso(e["envio"]) or data_iso(e["recebimento"])
+                if s["data"] <= quando < fim and re.search(r"ORDEM DO DIA|LEITURA E VOTA|VOTAÇÃO", e["fase"].upper()):
+                    voto = resultado_da_etapa(e["acao"])
+                    if voto:
+                        break
+            if voto:
+                item["resultado"] = {"codigo": voto}
+            elif hoje > s["data"]:
+                item["resultado"] = {"codigo": "adiado"}
+            else:
+                item["resultado"] = {"codigo": "aguardando"}
+        placar = {}
+        for item in s["pauta"]["itens"]:
+            grupo = "requerimentos" if re.search(r"Requerimento|Moção", item["tipo"]) else "projetos"
+            c = item["resultado"]["codigo"]
+            placar.setdefault(grupo, {})
+            placar[grupo][c] = placar[grupo].get(c, 0) + 1
+        s["placar"] = placar
+
+
+def atualizar(sessao, proposicoes, temas, destino, agora, apoio=None):
     anterior = json.loads(destino.read_text(encoding="utf-8")) if destino.exists() else {"sessoes": []}
     antigas = {s["id"]: s for s in anterior.get("sessoes", [])}
     indice = {}
@@ -195,8 +302,20 @@ def atualizar(sessao, proposicoes, temas, destino, agora):
                 print(f"presença {s['id']}: {erro}")
                 s["presenca"] = velha.get("presenca")
 
+    # Resultado (votado ou adiado) das 4 sessões ordinárias já realizadas mais recentes.
+    extra = anterior.get("indice_antigos", {})
+    if apoio:
+        hoje = agora[:10]
+        passadas = sorted([s for s in sessoes if s["data"] < hoje or (s["data"] == hoje and s["hora"] < agora[11:16])],
+                          key=lambda s: (s["data"], s["hora"]))[-4:]
+        try:
+            resultados(sessao, passadas, sessoes, indice, extra, apoio, hoje)
+        except Exception as erro:
+            print(f"resultados das sessões: {erro}")
+
     destino.write_text(json.dumps({
         "atualizado_em": agora, "portal": PORTAL + "sessoes.aspx",
         "ao_vivo": CANAL + "/live", "canal": CANAL + "/streams", "sessoes": sessoes,
+        "indice_antigos": extra,
     }, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     print(f"{len(sessoes)} sessões; próximas: {[s['data'] + ' ' + s['hora'] for s in sessoes if s['data'] >= agora[:10]]}")

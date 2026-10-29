@@ -268,3 +268,10 @@ input[type="search"]::placeholder { color: var(--text-muted); }
 .sessao__autor { color: var(--text-muted); }
 .sessao__ementa { flex-basis: 100%; color: var(--text-2); }
 .sessao__agora { flex-basis: 100%; font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+.rk--res { grid-template-columns: 210px minmax(0, 1fr) 92px; }
+.rk__total small { display: block; font-size: 10px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.04em; }
+@media (max-width: 640px) { .rk--res { grid-template-columns: minmax(0, 1fr) 80px; } }
+.placar { display: flex; flex-direction: column; gap: 6px; background: var(--bg-3); border-radius: var(--radius); padding: 12px 14px; font-size: 13.5px; color: var(--text-2); }
+.placar__linha { display: flex; flex-direction: column; gap: 1px; }
+.placar__rot { font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+.placar b { color: var(--text); }

@@ -325,7 +325,8 @@ def atualizar_sessoes(sessao, proposicoes, agora):
     """Próximas e últimas sessões (pauta, presença, vídeo). Falha aqui não invalida a coleta."""
     try:
         import sessoes
-        sessoes.atualizar(sessao, proposicoes, temas, DADOS / "sessoes.json", agora)
+        apoio = {"tramitacao": ler_tramitacao, "listar": coletar_tipo_ano, "base": BASE}
+        sessoes.atualizar(sessao, proposicoes, temas, DADOS / "sessoes.json", agora, apoio)
     except Exception as erro:
         print(f"sessões não atualizadas: {erro}", file=sys.stderr)
 
