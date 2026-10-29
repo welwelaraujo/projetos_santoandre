@@ -241,6 +241,7 @@ def main():
     hoje = datetime.now(BRT)
     ap = argparse.ArgumentParser()
     ap.add_argument("--anos", type=int, nargs="+", default=list(range(INICIO_LEGISLATURA, hoje.year + 1)))
+    ap.add_argument("--so-sessoes", action="store_true", help="atualiza só docs/dados/sessoes.json")
     args = ap.parse_args()
 
     DADOS.mkdir(parents=True, exist_ok=True)
@@ -250,6 +251,10 @@ def main():
 
     sessao = requests.Session()
     sessao.headers["User-Agent"] = "Mozilla/5.0 (projetos_santoandre; coleta diaria de dados publicos)"
+
+    if args.so_sessoes:
+        atualizar_sessoes(sessao, list(anterior.values()), hoje.strftime("%Y-%m-%dT%H:%M:%S"))
+        return
 
     atuais, falhas = {}, []
     for tipo in TIPOS:
@@ -313,6 +318,16 @@ def main():
     gravar("proposicoes.json", {"atualizado_em": agora, "fonte": BASE, "proposicoes": proposicoes})
     gravar("movimentacoes.json", movimentacoes[-3000:])
     print(f"{len(proposicoes)} proposições; {len(falhas)} falhas")
+    atualizar_sessoes(sessao, proposicoes, agora)
+
+
+def atualizar_sessoes(sessao, proposicoes, agora):
+    """Próximas e últimas sessões (pauta, presença, vídeo). Falha aqui não invalida a coleta."""
+    try:
+        import sessoes
+        sessoes.atualizar(sessao, proposicoes, temas, DADOS / "sessoes.json", agora)
+    except Exception as erro:
+        print(f"sessões não atualizadas: {erro}", file=sys.stderr)
 
 
 if __name__ == "__main__":

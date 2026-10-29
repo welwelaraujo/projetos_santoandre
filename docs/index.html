@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="estilo.css?v=6" />
+  <link rel="stylesheet" href="estilo.css?v=7" />
 </head>
 <body>
 
@@ -45,6 +45,24 @@
     <section class="secao">
       <div class="container">
         <div class="kpis" id="kpis"></div>
+      </div>
+    </section>
+
+    <section class="secao" id="proximas">
+      <div class="container">
+        <p class="section-label">Plenário</p>
+        <h2 class="secao__titulo">Próximas sessões</h2>
+        <p class="secao__intro">As sessões ordinárias acontecem às <strong>terças-feiras, às 9h e às 15h</strong>, com transmissão ao vivo pelo canal da Câmara no YouTube. Quando a Ordem do Dia já foi publicada, mostramos os temas e os projetos que vão a voto.</p>
+        <div class="sessoes" id="l-proximas"></div>
+      </div>
+    </section>
+
+    <section class="secao" id="ultimas">
+      <div class="container">
+        <p class="section-label">Destaque</p>
+        <h2 class="secao__titulo">Últimas sessões</h2>
+        <p class="secao__intro">O que esteve na pauta das duas sessões mais recentes, quem compareceu e em que situação cada projeto está hoje.</p>
+        <div class="sessoes" id="l-ultimas"></div>
       </div>
     </section>
 
@@ -103,12 +121,100 @@
     <p class="footer__credito container">Desenvolvido por: <strong>Wellington Araujo Nogueira</strong> · <a href="mailto:wellingtonaraujonogueira@outlook.com">wellingtonaraujonogueira@outlook.com</a> · LinkedIn: <a href="https://www.linkedin.com/in/wellingtonaraujonogueira/" target="_blank" rel="noopener">linkedin.com/in/wellingtonaraujonogueira</a></p>
   </footer>
 
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=3"></script>
   <script>
   (function () {
     var A = window.APP;
+    // Sessões: a página decide pelo relógio de quem acessa o que é próxima, ao vivo ou já passou.
+    var DIAS = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+    var DURACAO = 4 * 3600 * 1000;
+    function inicio(s) { return new Date(s.data + 'T' + s.hora + ':00-03:00'); }
+    function quando(s) {
+      var dia = DIAS[new Date(s.data + 'T12:00:00Z').getUTCDay()];
+      return dia.charAt(0).toUpperCase() + dia.slice(1) + ', ' + A.data(s.data).slice(0, 5) + ' · ' + s.hora.replace(':00', 'h');
+    }
+    function proximaTerca(agora) {
+      var d = new Date(agora);
+      for (var i = 0; i < 8; i++) {
+        var iso = d.toLocaleDateString('sv-SE', { timeZone: 'America/Sao_Paulo' });
+        if (new Date(iso + 'T12:00:00Z').getUTCDay() === 2 &&new Date(iso + 'T15:00:00-03:00').getTime() + DURACAO > agora) return iso;
+        d = new Date(d.getTime() + 86400000);
+      }
+    }
+    function titulo(s) { return s.numero ? s.numero + 'ª Sessão ' + s.tipo : 'Sessão Ordinária'; }
+    function resumoTemas(pauta) {
+      var t = Object.keys(pauta.temas || {}).slice(0, 6);
+      return t.length ? '<div class="temas">' + t.map(function (k) {
+        return '<span class="tema">' + A.esc(k) + ' · ' + pauta.temas[k] + '</span>';
+      }).join('') + '</div>' : '';
+    }
+    function contagem(itens) {
+      var proj = itens.filter(function (i) { return !/Requerimento|Moção/.test(i.tipo); });
+      var partes = [];
+      if (proj.length) partes.push(proj.length + (proj.length > 1 ? ' projetos e vetos' : ' projeto ou veto'));
+      var req = itens.length - proj.length;
+      if (req) partes.push(req + (req > 1 ? ' requerimentos e moções' : ' requerimento ou moção'));
+      return partes.join(' · ');
+    }
+    function linhaItem(item, D) {
+      var p = item.proposicao_id && D.porId[item.proposicao_id];
+      var nome = A.esc(item.tipo) + (item.numero ? ' nº ' + item.numero + '/' + item.ano : '');
+      return '<li><span class="sessao__voto">' + A.esc(item.votacao) + (item.adiada ? ' (adiada)' : '') + '</span>' +
+        '<strong>' + (p ? '<a href="' + A.linkCamara(p) + '" target="_blank" rel="noopener">' + nome + '</a>' : nome) + '</strong>' +
+        (item.autor ? ' <span class="sessao__autor">· ' + A.esc(item.autor) + '</span>' : '') +
+        '<span class="sessao__ementa">' + A.esc(A.frase(item.ementa).slice(0, 160)) + (item.ementa.length > 160 ? '…' : '') + '</span>' +
+        (p ? '<span class="sessao__agora">Hoje: ' + A.situacaoHtml(p) + '</span>' : '') + '</li>';
+    }
+    function cartaoSessao(s, D, S, modo) {
+      var agora = Date.now(), ini = s.data ? inicio(s).getTime() : 0;
+      var aoVivo = ini && agora >= ini - 15 * 60000 && agora < ini + DURACAO;
+      var pauta = s.pauta || { itens: [], temas: {} };
+      var projetos = pauta.itens.filter(function (i) { return !/Requerimento|Moção/.test(i.tipo); });
+      // Itens adiados se repetem toda semana; o que de fato foi a voto vem primeiro.
+      projetos.sort(function (a, b) { return (a.adiada - b.adiada) || (a.ordem - b.ordem); });
+      var docs = (s.docs || []).filter(function (d) { return /ordem do dia/i.test(d.titulo); });
+      var video = modo === 'ultima'
+        ? (s.video ? '<a class="btn btn--yellow btn--sm" href="https://www.youtube.com/watch?v=' + s.video + '" target="_blank" rel="noopener">▶ Assistir à gravação</a>' : '<a class="btn btn--outline btn--sm" href="' + S.canal + '" target="_blank" rel="noopener">▶ Gravações no YouTube</a>')
+        : '<a class="btn btn--yellow btn--sm" href="' + S.ao_vivo + '" target="_blank" rel="noopener">▶ ' + (aoVivo ? 'Assistir agora' : 'Acompanhar ao vivo') + '</a>';
+      var pres = s.presenca && s.presenca.total ? '<p class="sessao__pres"><strong>' + s.presenca.presentes + ' de ' + s.presenca.total + '</strong> vereadores presentes' +
+        (s.presenca.ausentes.length ? ' · Faltas: ' + s.presenca.ausentes.map(function (a) { return A.esc(a.nome) + (a.situacao !== 'Ausente' ? ' (' + A.esc(a.situacao.toLowerCase()) + (a.motivo ? ': ' + A.esc(a.motivo.toLowerCase()) : '') + ')' : ''); }).join(', ') : '') + '</p>' : '';
+      var corpoPauta = pauta.itens.length
+        ? '<p class="sessao__conta">Ordem do Dia: ' + contagem(pauta.itens) + '</p>' + resumoTemas(pauta) +
+          (projetos.length ? '<details class="sessao__itens"' + (modo === 'proxima' ? ' open' : '') + '><summary>' + (modo === 'ultima' ? 'Projetos pautados e situação hoje' : 'Projetos que vão a voto') + ' (' + projetos.length + ')</summary><ul>' +
+            projetos.map(function (i) { return linhaItem(i, D); }).join('') + '</ul></details>' : '')
+        : '<p class="sessao__conta">' + (s.previsto ? 'Previsão pelo calendário. A pauta ainda não foi publicada.' : 'A Ordem do Dia ainda não foi publicada.') + '</p>';
+      return '<article class="sessao' + (aoVivo ? ' sessao--vivo' : '') + '">' +
+        '<div class="sessao__topo"><span class="sessao__quando">' + quando(s) + '</span>' + (aoVivo ? '<span class="sit sit--pauta">● Ao vivo</span>' : '') + '</div>' +
+        '<h3 class="sessao__titulo">' + A.esc(titulo(s)) + '</h3>' + pres + corpoPauta +
+        '<div class="sessao__acoes">' + video + docs.map(function (d) {
+          return '<a class="btn btn--outline btn--sm" href="' + d.url + '" target="_blank" rel="noopener">' + A.esc(d.titulo.replace(/ - Nº.*$/, '').replace('Pauta para ', '')) + '</a>';
+        }).join('') + '<a class="btn btn--outline btn--sm" href="' + S.portal + '" target="_blank" rel="noopener">Portal da Câmara ↗</a></div></article>';
+    }
+    function desenhaSessoes(D) {
+      fetch('dados/sessoes.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (S) {
+        var agora = Date.now();
+        var lista = S.sessoes.filter(function (s) { return /Ordinária|Extraordinária/.test(s.tipo); });
+        var futuras = lista.filter(function (s) { return inicio(s).getTime() + DURACAO > agora; })
+          .sort(function (a, b) { return inicio(a) - inicio(b); });
+        // Completa o próximo dia de sessão com os horários que o portal ainda não publicou.
+        var dia = futuras.length ? futuras[0].data : proximaTerca(agora);
+        ['09:00', '15:00'].forEach(function (h) {
+          if (!futuras.some(function (s) { return s.data === dia && s.hora === h; })) futuras.push({ data: dia, hora: h, tipo: 'Ordinária', previsto: true });
+        });
+        futuras.sort(function (a, b) { return inicio(a) - inicio(b); });
+        var passadas = lista.filter(function (s) { return inicio(s).getTime() + DURACAO <= agora; })
+          .sort(function (a, b) { return inicio(b) - inicio(a); }).slice(0, 2);
+        document.getElementById('l-proximas').innerHTML = futuras.slice(0, 2).map(function (s) { return cartaoSessao(s, D, S, 'proxima'); }).join('');
+        document.getElementById('l-ultimas').innerHTML = passadas.map(function (s) { return cartaoSessao(s, D, S, 'ultima'); }).join('') ||
+          '<p class="vazio">Nenhuma sessão recente encontrada.</p>';
+      }).catch(function () {
+        document.getElementById('l-proximas').innerHTML = '<p class="vazio">Não foi possível carregar as sessões.</p>';
+      });
+    }
+
     A.carregar().then(function (D) {
       var P = D.proposicoes;
+      desenhaSessoes(D);
       var ref = new Date(D.atualizado_em.slice(0, 10) + 'T12:00:00');
       function diasAtras(n) { var d = new Date(ref); d.setDate(d.getDate() - n); return A.diaISO(d); }
       var ano = D.atualizado_em.slice(0, 4);

@@ -138,6 +138,6 @@
   window.APP = {
     CATEGORIAS: CATEGORIAS, COR: COR, MESES: MESES, RESULTADOS: RESULTADOS, GRUPO: GRUPO,
     esc: esc, int: int, data: data, dataHora: dataHora, diaISO: diaISO, semAcento: semAcento, frase: frase,
-    naPauta: naPauta, coletiva: coletiva, cartao: cartao, carregar: carregar, legenda: legenda, linkCamara: linkCamara
+    naPauta: naPauta, coletiva: coletiva, cartao: cartao, situacaoHtml: situacao, carregar: carregar, legenda: legenda, linkCamara: linkCamara
   };
 })();

@@ -247,3 +247,24 @@ input[type="search"]::placeholder { color: var(--text-muted); }
   .rk { grid-template-columns: minmax(0, 1fr) 48px; gap: 4px 10px; }
   .rk__nome { grid-column: 1 / -1; }
 }
+
+/* Sessões plenárias (página inicial) */
+.sessoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); gap: 16px; }
+.sessao { background: var(--bg-2); border: 1px solid var(--border); border-top: 4px solid var(--yellow); border-radius: var(--radius); padding: 22px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.sessao--vivo { border-color: rgba(252,189,39,0.6); box-shadow: 0 0 0 1px rgba(252,189,39,0.35); }
+.sessao__topo { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.sessao__quando { font-size: 12px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--yellow); }
+.sessao__titulo { font-size: 22px; font-weight: 900; text-transform: uppercase; letter-spacing: -0.01em; line-height: 1.1; }
+.sessao__pres, .sessao__conta { font-size: 13.5px; color: var(--text-2); }
+.sessao__pres strong { color: var(--text); }
+.sessao__acoes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 6px; }
+.sessao__itens summary { cursor: pointer; font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-2); padding: 6px 0; }
+.sessao__itens summary:hover { color: var(--yellow); }
+.sessao__itens ul { list-style: none; display: flex; flex-direction: column; max-height: 420px; overflow-y: auto; border-top: 1px solid var(--border); }
+.sessao__itens li { padding: 10px 2px; border-bottom: 1px solid var(--border); font-size: 13px; display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; }
+.sessao__itens li a { color: var(--text); text-decoration: none; }
+.sessao__itens li a:hover { color: var(--yellow); }
+.sessao__voto { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); border: 1px solid rgba(255,255,255,0.18); border-radius: 3px; padding: 1px 6px; }
+.sessao__autor { color: var(--text-muted); }
+.sessao__ementa { flex-basis: 100%; color: var(--text-2); }
+.sessao__agora { flex-basis: 100%; font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; margin-top: 2px; }
