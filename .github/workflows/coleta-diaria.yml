@@ -1,15 +1,15 @@
-name: Coleta diária e publicação
+name: Publicar site
 
+# A coleta roda no PC (scripts/rotina_diaria.ps1, agendada no Windows), porque o portal da
+# Câmara não responde aos servidores do GitHub. Aqui só se publica o que chega em docs/.
 on:
-  schedule:
-    - cron: "0 9 * * *"   # 6h em Brasília
-  workflow_dispatch:
   push:
     branches: [main]
     paths: ["docs/**"]
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -18,37 +18,13 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  coletar:
-    if: github.event_name != 'push'
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - run: pip install requests
-      - name: Coletar proposições
-        run: python scripts/coletar.py
-      - name: Gravar dados no repositório
-        run: |
-          git config user.name "coleta-diaria"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/dados
-          git diff --cached --quiet || git commit -m "Coleta diária $(TZ=America/Sao_Paulo date +%F)"
-          git push
-
   publicar:
-    needs: coletar
-    if: always() && (needs.coletar.result == 'success' || needs.coletar.result == 'skipped')
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: main
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

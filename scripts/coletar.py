@@ -184,6 +184,9 @@ def main():
             except requests.RequestException as erro:
                 falhas.append((tipo, ano))
                 print(f"falha tipo {tipo} ano {ano}: {erro}", file=sys.stderr)
+                # Portal fora do ar (ou bloqueando este IP): não adianta insistir em todos os tipos.
+                if len(falhas) >= 3 and not atuais:
+                    sys.exit("portal da Câmara inacessível; dados anteriores mantidos")
                 continue
             for item in itens:
                 atuais[item["id"]] = item
