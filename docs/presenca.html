@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Presença dos vereadores</title>
+  <meta name="description" content="Presença dos vereadores de Santo André em cada sessão da Câmara, com faltas justificadas e sem justificativa." />
+  <link rel="icon" href="img/wan.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="img/wan_180.png" />
+  <meta property="og:image" content="https://welwelaraujo.github.io/projetos_santoandre/img/og.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="estilo.css?v=11" />
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav__inner container">
+      <a href="./" class="marca"><img class="marca__logo" src="img/wan.svg" alt="WAN" width="36" height="36" /><span class="marca__texto">Projetos <em>Santo André</em></span></a>
+      <ul class="nav__links">
+        <li><a href="./">Hoje</a></li>
+        <li><a href="explorar.html">Explorar</a></li>
+        <li><a href="vereadores.html">Vereadores</a></li>
+        <li><a href="presenca.html" aria-current="page">Presença</a></li>
+        <li><a href="sobre.html">Sobre</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="container">
+      <p class="section-label">Sessões plenárias</p>
+      <h1 class="hero__title">Quem <em>aparece</em> para trabalhar</h1>
+      <p class="hero__lede">A presença de cada vereador em cada sessão da Câmara de Santo André desde 2025, com as faltas justificadas, as faltas sem justificativa e o motivo informado. Use os filtros para ver um período, um tipo de sessão ou um vereador.</p>
+      <div class="hero__meta"><span>Atualizado em <b data-atualizado-pres>—</b></span><span>Fonte: lista de presença da Câmara</span></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="secao">
+      <div class="container">
+        <form class="filtros" id="filtros" onsubmit="return false">
+          <label>Período<select id="periodo"></select></label>
+          <label>De<input type="date" id="de" /></label>
+          <label>Até<input type="date" id="ate" /></label>
+          <label>Tipo de sessão<select id="tipo"></select></label>
+          <label>Vereador<select id="vereador"></select></label>
+          <label>Situação<select id="situacao">
+            <option value="">Todas as faltas</option>
+            <option value="Falta Justificada">Só faltas justificadas</option>
+            <option value="Falta">Só faltas sem justificativa</option>
+          </select></label>
+        </form>
+        <div class="resumo-busca">
+          <span id="contagem">Carregando…</span>
+          <button type="button" class="btn btn--outline btn--sm" id="limpar">Limpar filtros</button>
+        </div>
+        <div class="kpis" id="kpis"></div>
+        <div class="aviso" id="quorum" style="margin-top:16px" hidden></div>
+      </div>
+    </section>
+
+    <section class="secao">
+      <div class="container">
+        <p class="section-label">Ranking</p>
+        <h2 class="secao__titulo">Presença por vereador</h2>
+        <p class="secao__intro">Percentual de sessões em que cada vereador esteve presente, considerando só as sessões em que ele era titular da cadeira. Suplentes aparecem com o número de sessões em que assumiram. Ordenado por número de faltas.</p>
+        <div class="cartao">
+          <div class="legenda" id="legenda"></div>
+          <div class="ranking" id="ranking"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="secao">
+      <div class="container">
+        <p class="section-label">Sessão a sessão</p>
+        <h2 class="secao__titulo">Mapa de presença</h2>
+        <p class="secao__intro">Cada coluna é uma sessão, da mais antiga à mais recente. Passe o mouse ou toque num quadrado para ver a data e o motivo da falta.</p>
+        <div class="cartao"><div class="mapa-wrap" id="mapa"></div></div>
+      </div>
+    </section>
+
+    <section class="secao">
+      <div class="container">
+        <p class="section-label">Registros</p>
+        <h2 class="secao__titulo">Lista de faltas</h2>
+        <div class="tabela-wrap"><table id="tabela"></table></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <a href="./" class="marca"><img class="marca__logo" src="img/wan.svg" alt="WAN" width="36" height="36" /></a>
+      <nav class="footer__links">
+        <a href="./">Hoje</a>
+        <a href="explorar.html">Explorar</a>
+        <a href="vereadores.html">Vereadores</a>
+        <a href="presenca.html">Presença</a>
+        <a href="sobre.html">Sobre</a>
+      </nav>
+      <p class="footer__info">Fonte: portal Câmara sem Papel, da Câmara Municipal de Santo André. Consulte sempre o texto oficial.</p>
+    </div>
+    <p class="footer__credito container">Desenvolvido por: <strong>Wellington Araujo Nogueira</strong> · <a href="mailto:wellingtonaraujonogueira@outlook.com">wellingtonaraujonogueira@outlook.com</a> · LinkedIn: <a href="https://www.linkedin.com/in/wellingtonaraujonogueira/" target="_blank" rel="noopener">linkedin.com/in/wellingtonaraujonogueira</a></p>
+  </footer>
+
+  <script src="app.js?v=3"></script>
+  <script>
+  (function () {
+    var A = window.APP;
+    var COR = { 'Presente': '#199e70', 'Falta Justificada': '#b5880f', 'Falta': '#e66767' };
+    var ROTULO = { 'Presente': 'Presente', 'Falta Justificada': 'Falta justificada', 'Falta': 'Falta sem justificativa' };
+    var PORTAL = 'https://camarasempapel.cmsandre.sp.gov.br/spl/sessao-parlamentares.aspx?id=';
+    var el = {};
+    ['periodo', 'de', 'ate', 'tipo', 'vereador', 'situacao'].forEach(function (c) { el[c] = document.getElementById(c); });
+
+    fetch('dados/presencas.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (D) {
+      document.querySelector('[data-atualizado-pres]').textContent = A.dataHora(D.atualizado_em);
+      var S = D.sessoes;
+      // Situação de cada vereador em cada sessão.
+      S.forEach(function (s) {
+        s.sit = {};
+        s.nomes.forEach(function (n) { s.sit[n] = { situacao: 'Presente', motivo: '' }; });
+        s.faltas.forEach(function (f) { s.sit[f[0]] = { situacao: f[1], motivo: f[2] }; });
+      });
+      var anos = Object.keys(S.reduce(function (o, s) { o[s.data.slice(0, 4)] = 1; return o; }, {})).sort();
+      el.periodo.innerHTML = '<option value="">Legislatura (desde 2025)</option>' + anos.map(function (a) { return '<option value="' + a + '">' + a + '</option>'; }).join('') +
+        '<option value="30">Últimos 30 dias</option><option value="90">Últimos 90 dias</option><option value="custom">Escolher datas</option>';
+      var tipos = Object.keys(S.reduce(function (o, s) { o[s.tipo] = 1; return o; }, {})).sort();
+      el.tipo.innerHTML = '<option value="">Todas</option>' + tipos.map(function (t) { return '<option>' + A.esc(t) + '</option>'; }).join('');
+      var cont = {};
+      S.forEach(function (s) { s.nomes.forEach(function (n) { cont[n] = (cont[n] || 0) + 1; }); });
+      var vereadores = Object.keys(cont).sort(function (a, b) { return a.localeCompare(b); });
+      el.vereador.innerHTML = '<option value="">Todos</option>' + vereadores.map(function (n) { return '<option>' + A.esc(n) + '</option>'; }).join('');
+      document.getElementById('legenda').innerHTML = '<div class="legenda">' + Object.keys(COR).map(function (k) {
+        return '<span><i style="background:' + COR[k] + '"></i>' + ROTULO[k] + '</span>';
+      }).join('') + '</div>';
+
+      var url = new URLSearchParams(location.search);
+      ['periodo', 'de', 'ate', 'tipo', 'vereador', 'situacao'].forEach(function (c) { if (url.get(c)) el[c].value = url.get(c); });
+
+      function intervalo() {
+        var p = el.periodo.value, hoje = new Date(D.atualizado_em.slice(0, 10) + 'T12:00:00Z');
+        if (/^\d{4}$/.test(p)) return [p + '-01-01', p + '-12-31'];
+        if (p === '30' || p === '90') { var d = new Date(hoje.getTime() - p * 86400000); return [d.toISOString().slice(0, 10), '9999']; }
+        if (p === 'custom') return [el.de.value || '0000', el.ate.value || '9999'];
+        return ['0000', '9999'];
+      }
+
+      function aplicar() {
+        var custom = el.periodo.value === 'custom';
+        el.de.disabled = el.ate.disabled = !custom;
+        var iv = intervalo(), ver = el.vereador.value, sit = el.situacao.value;
+        var sessoes = S.filter(function (s) { return s.data >= iv[0] && s.data <= iv[1] && (!el.tipo.value || s.tipo === el.tipo.value); });
+        var u = new URLSearchParams();
+        ['periodo', 'tipo', 'vereador', 'situacao'].forEach(function (c) { if (el[c].value) u.set(c, el[c].value); });
+        if (custom) { if (el.de.value) u.set('de', el.de.value); if (el.ate.value) u.set('ate', el.ate.value); }
+        history.replaceState(null, '', location.pathname + (u.toString() ? '?' + u : ''));
+
+        // Contagem por vereador.
+        var por = {};
+        sessoes.forEach(function (s) {
+          Object.keys(s.sit).forEach(function (n) {
+            var r = por[n] = por[n] || { nome: n, sessoes: 0, Presente: 0, 'Falta Justificada': 0, 'Falta': 0 };
+            r.sessoes++; r[s.sit[n].situacao] = (r[s.sit[n].situacao] || 0) + 1;
+          });
+        });
+        var lista = Object.keys(por).map(function (k) { return por[k]; });
+        function faltas(r) { return sit ? r[sit] : r['Falta Justificada'] + r['Falta']; }
+        lista.sort(function (a, b) { return (faltas(b) - faltas(a)) || (b['Falta'] - a['Falta']) || a.nome.localeCompare(b.nome); });
+
+        var registros = [];
+        sessoes.forEach(function (s) {
+          Object.keys(s.sit).forEach(function (n) {
+            var x = s.sit[n];
+            if (x.situacao === 'Presente' || (ver && n !== ver) || (sit && x.situacao !== sit)) return;
+            registros.push({ s: s, nome: n, situacao: x.situacao, motivo: x.motivo });
+          });
+        });
+        registros.sort(function (a, b) { return (b.s.data + b.s.hora).localeCompare(a.s.data + a.s.hora) || a.nome.localeCompare(b.nome); });
+
+        // Destaques.
+        var alvo = ver ? lista.filter(function (r) { return r.nome === ver; }) : lista;
+        var tot = alvo.reduce(function (o, r) { o.s += r.sessoes; o.p += r.Presente; o.j += r['Falta Justificada']; o.f += r['Falta']; return o; }, { s: 0, p: 0, j: 0, f: 0 });
+        document.getElementById('contagem').innerHTML = '<strong>' + sessoes.length + '</strong> sessões no período' + (ver ? ' · ' + A.esc(ver) : '');
+        document.getElementById('kpis').innerHTML = [
+          [ver ? 'Sessões do vereador' : 'Sessões', ver ? tot.s : sessoes.length, ver ? 'em que ele era titular' : 'com lista de presença', 'var(--yellow)'],
+          ['Presença', tot.s ? (100 * tot.p / tot.s).toFixed(1).replace('.', ',') + '%' : '—', A.int(tot.p) + ' presenças registradas', COR['Presente']],
+          ['Faltas justificadas', tot.j, 'com motivo informado à Câmara', COR['Falta Justificada']],
+          ['Faltas sem justificativa', tot.f, 'sem motivo registrado', COR['Falta']]
+        ].map(function (k) {
+          return '<div class="kpi" style="--kpi-cor:' + k[3] + '"><div class="kpi__rotulo">' + k[0] + '</div><div class="kpi__valor">' + (typeof k[1] === 'number' ? A.int(k[1]) : k[1]) + '</div><div class="kpi__sub">' + k[2] + '</div></div>';
+        }).join('');
+
+        // Sessões que caíram por falta de quórum (a Câmara registra falta para quem não compareceu).
+        var semQuorum = sessoes.filter(function (s) { return s.faltas.some(function (f) { return /quórum/i.test(f[2]); }); });
+        var q = document.getElementById('quorum');
+        q.hidden = !semQuorum.length;
+        q.innerHTML = semQuorum.map(function (s) {
+          var presentes = s.nomes.filter(function (n) { return s.sit[n].situacao === 'Presente'; });
+          return '<strong>Sessão derrubada por falta de quórum:</strong> a ' + s.numero + 'ª Sessão ' + A.esc(s.tipo) + ' de ' + A.data(s.data) + ', às ' + s.hora +
+            ', não foi realizada porque só ' + presentes.length + ' de ' + s.total + ' vereadores compareceram (' + presentes.map(A.esc).join(', ') + '). Os outros receberam falta sem justificativa.';
+        }).join('<br><br>');
+
+        // Ranking: barra empilhada presente / justificada / sem justificativa, em % das sessões do vereador.
+        document.getElementById('ranking').innerHTML = lista.map(function (r) {
+          var pct = r.sessoes ? 100 * r.Presente / r.sessoes : 0;
+          var segs = ['Presente', 'Falta Justificada', 'Falta'].filter(function (k) { return r[k]; }).map(function (k) {
+            return '<i style="width:' + (r[k] / r.sessoes * 100) + '%;background:' + COR[k] + '" data-dica="<b>' + A.esc(r.nome) + '</b><br>' + ROTULO[k] + ': ' + r[k] + ' de ' + r.sessoes + '"></i>';
+          }).join('');
+          return '<a class="rk rk--res rk--pres' + (ver && ver !== r.nome ? ' rk--apagado' : '') + '" href="?vereador=' + encodeURIComponent(r.nome) + (el.periodo.value ? '&periodo=' + el.periodo.value : '') + '">' +
+            '<span class="rk__nome">' + A.esc(r.nome) + '</span><span class="rk__barra">' + segs + '</span>' +
+            '<span class="rk__total">' + pct.toFixed(0) + '%<small>' + (r['Falta Justificada'] + r['Falta']) + ' falta' + (r['Falta Justificada'] + r['Falta'] === 1 ? '' : 's') + ' · ' + r.sessoes + ' sessões</small></span></a>';
+        }).join('') || '<p class="vazio">Nenhuma sessão no período.</p>';
+
+        // Mapa vereador × sessão.
+        var linhas = ver ? [ver] : lista.map(function (r) { return r.nome; });
+        document.getElementById('mapa').innerHTML = sessoes.length ? '<div class="mapa" style="--n:' + sessoes.length + '">' + linhas.map(function (n) {
+          return '<div class="mapa__nome">' + A.esc(n) + '</div><div class="mapa__linha">' + sessoes.map(function (s) {
+            var x = s.sit[n];
+            var dica = '<b>' + A.esc(n) + '</b><br>' + s.numero + 'ª Sessão ' + A.esc(s.tipo) + ' · ' + A.data(s.data) + ' ' + s.hora + '<br>' +
+              (x ? ROTULO[x.situacao] + (x.motivo ? ': ' + A.esc(x.motivo) : '') : 'Não era titular nesta sessão');
+            var cor = x ? COR[x.situacao] : 'transparent';
+            var esmaece = x && sit && x.situacao !== sit ? ' mapa__c--fraco' : '';
+            return '<a class="mapa__c' + esmaece + '" href="' + PORTAL + s.id + '" target="_blank" rel="noopener" style="background:' + cor + '" data-dica="' + dica.replace(/"/g, '&quot;') + '"></a>';
+          }).join('') + '</div>';
+        }).join('') + '</div>' : '<p class="vazio">Nenhuma sessão no período.</p>';
+
+        // Tabela de faltas.
+        document.getElementById('tabela').innerHTML = '<thead><tr><th>Data</th><th>Sessão</th><th>Vereador</th><th style="text-align:left">Situação</th><th style="text-align:left">Motivo informado</th></tr></thead><tbody>' +
+          (registros.length ? registros.map(function (r) {
+            return '<tr><td>' + A.data(r.s.data) + ' ' + r.s.hora + '</td><td><a href="' + PORTAL + r.s.id + '" target="_blank" rel="noopener" style="color:inherit">' + r.s.numero + 'ª ' + A.esc(r.s.tipo) + '</a></td>' +
+              '<td>' + A.esc(r.nome) + '</td><td style="text-align:left"><span class="sit sit--' + (r.situacao === 'Falta' ? 'nao' : 'neutro') + '">' + ROTULO[r.situacao] + '</span></td>' +
+              '<td style="text-align:left;white-space:normal;color:var(--text-muted)">' + A.esc(r.motivo || '—') + '</td></tr>';
+          }).join('') : '<tr><td colspan="5" class="vazio">Nenhuma falta com esses filtros.</td></tr>') + '</tbody>';
+      }
+
+      ['periodo', 'de', 'ate', 'tipo', 'vereador', 'situacao'].forEach(function (c) { el[c].addEventListener('change', aplicar); });
+      document.getElementById('limpar').addEventListener('click', function () {
+        ['periodo', 'de', 'ate', 'tipo', 'vereador', 'situacao'].forEach(function (c) { el[c].value = ''; });
+        aplicar();
+      });
+      aplicar();
+    });
+  })();
+  </script>
+</body>
+</html>

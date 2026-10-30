@@ -8,6 +8,7 @@ import html
 import io
 import json
 import re
+from datetime import datetime, timedelta
 
 import fitz  # PyMuPDF
 
@@ -125,6 +126,7 @@ def presenca(sessao, ses_id):
         "presentes": sum(1 for r in registros if r["situacao"] == "Presente"),
         "total": len(registros),
         "ausentes": [r for r in registros if r["situacao"] != "Presente"],
+        "nomes": [r["nome"] for r in registros],
     }
 
 
@@ -144,6 +146,67 @@ def videos(sessao):
             chave = f"{m.group(1)}|{m.group(5)}-{meses[m.group(4)]:02d}-{int(m.group(3)):02d}"
             achados[chave] = vid.group(1)
     return achados
+
+
+def todas_as_sessoes(sessao, desde="01/01/2025", ate="31/12/2099"):
+    """Todas as sessões a partir de `desde`, paginando a lista (10 por página, postback do ASP.NET)."""
+    url = PORTAL + "sessoes.aspx"
+    pagina = sessao.get(url, timeout=90).text
+    campos = dict(re.findall(r'<input type="hidden" name="([^"]+)" id="[^"]*" value="([^"]*)"', pagina))
+    base = {"ctl00$ContentPlaceHolder1$txt_data_inicio": desde, "ctl00$ContentPlaceHolder1$txt_data_final": ate,
+            "ctl00$ContentPlaceHolder1$ddl_tipo_sessao": "", "ctl00$ContentPlaceHolder1$ddl_sessao_arquivo_tipo": ""}
+    pagina = sessao.post(url, data={**campos, **base, "__EVENTTARGET": "", "__EVENTARGUMENT": "",
+                                    "ctl00$ContentPlaceHolder1$btn_buscar": "Buscar"}, timeout=90).text
+    todas, vistas = [], set()
+    for _ in range(100):
+        novas = [s for s in listar(pagina) if (s["numero"], s["tipo"], s["data"], s["hora"]) not in vistas]
+        if not novas:
+            break
+        todas += novas
+        vistas.update((s["numero"], s["tipo"], s["data"], s["hora"]) for s in novas)
+        if "lvSessoes_lbNext&#39;" not in pagina:
+            break
+        campos = dict(re.findall(r'<input type="hidden" name="([^"]+)" id="[^"]*" value="([^"]*)"', pagina))
+        pagina = sessao.post(url, data={**campos, **base, "__EVENTTARGET": "ctl00$ContentPlaceHolder1$lvSessoes_lbNext",
+                                        "__EVENTARGUMENT": ""}, timeout=90).text
+    return todas
+
+
+def historico_presenca(sessao, destino, agora):
+    """Grava docs/dados/presencas.json com a presença de cada sessão desde 2025.
+
+    Sessões com mais de 15 dias não são relidas (a lista de presença não muda depois de fechada).
+    """
+    anterior = json.loads(destino.read_text(encoding="utf-8")) if destino.exists() else {"sessoes": []}
+    guardadas = {s["id"]: s for s in anterior["sessoes"]}
+    limite = (datetime.fromisoformat(agora[:10]) - timedelta(days=15)).date().isoformat()
+    resultado = []
+    for s in todas_as_sessoes(sessao):
+        if not (s["tem_presenca"] and s["id"]):
+            continue
+        velha = guardadas.get(s["id"])
+        if velha and velha["data"] < limite:
+            resultado.append(velha)
+            continue
+        try:
+            p = presenca(sessao, s["id"])
+        except Exception as erro:
+            print(f"presença {s['id']}: {erro}")
+            if velha:
+                resultado.append(velha)
+            continue
+        if not p["total"]:
+            continue
+        faltas = {a["nome"]: a for a in p["ausentes"]}
+        resultado.append({
+            "id": s["id"], "numero": s["numero"], "tipo": s["tipo"], "data": s["data"], "hora": s["hora"],
+            "presentes": p["presentes"], "total": p["total"], "nomes": p["nomes"],
+            "faltas": [[n, faltas[n]["situacao"], faltas[n]["motivo"]] for n in p["nomes"] if n in faltas],
+        })
+    resultado.sort(key=lambda s: (s["data"], s["hora"]))
+    destino.write_text(json.dumps({"atualizado_em": agora, "sessoes": resultado}, ensure_ascii=False, separators=(",", ":")),
+                       encoding="utf-8")
+    print(f"presença: {len(resultado)} sessões")
 
 
 def resultado_da_etapa(acao):

@@ -327,6 +327,7 @@ def atualizar_sessoes(sessao, proposicoes, agora):
         import sessoes
         apoio = {"tramitacao": ler_tramitacao, "listar": coletar_tipo_ano, "base": BASE}
         sessoes.atualizar(sessao, proposicoes, temas, DADOS / "sessoes.json", agora, apoio)
+        sessoes.historico_presenca(sessao, DADOS / "presencas.json", agora)
     except Exception as erro:
         print(f"sessões não atualizadas: {erro}", file=sys.stderr)
 
