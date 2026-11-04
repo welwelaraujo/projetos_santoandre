@@ -1,4 +1,4 @@
-# Rotina diária: coleta as proposições da Câmara, grava e envia ao GitHub (o push publica o site).
+﻿# Rotina diária: coleta as proposições da Câmara, grava e envia ao GitHub (o push publica o site).
 # Roda pelo Agendador de Tarefas do Windows ("Projetos Santo André - coleta diária").
 # Precisa rodar daqui: o portal da Câmara não responde aos servidores do GitHub Actions.
 
@@ -12,7 +12,9 @@ function Registrar($msg) { "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') $msg" | Ou
 try {
     Registrar 'início'
     git pull --quiet --rebase
-    python scripts/coletar.py 2>&1 | Out-File -Append -Encoding utf8 $log
+    # Via cmd: no PowerShell 5.1, o stderr do Python redirecionado vira erro e interrompe com 'Stop'.
+    $env:PYTHONIOENCODING = 'utf-8'
+    cmd /c "python scripts\coletar.py >> `"$log`" 2>&1"
     if ($LASTEXITCODE -ne 0) { throw "coletar.py terminou com código $LASTEXITCODE" }
     git add docs/dados
     git diff --cached --quiet
