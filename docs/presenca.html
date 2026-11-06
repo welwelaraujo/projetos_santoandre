@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="estilo.css?v=11" />
+  <link rel="stylesheet" href="estilo.css?v=12" />
 </head>
 <body>
 
@@ -70,6 +70,33 @@
           <div class="legenda" id="legenda"></div>
           <div class="ranking" id="ranking"></div>
         </div>
+      </div>
+    </section>
+
+    <section class="secao">
+      <div class="container">
+        <p class="section-label">Regras</p>
+        <h2 class="secao__titulo">O que acontece quando o vereador falta</h2>
+        <p class="secao__intro">Resumo do que dizem a Lei Orgânica do Município, o Regimento Interno da Câmara e a Resolução nº 8/2018 sobre faltas dos vereadores.</p>
+        <div class="regras">
+          <div class="cartao">
+            <p class="section-label">Desconto no salário</p>
+            <p>Cada falta sem justificativa a uma <strong>sessão ordinária</strong> desconta <strong>1/30 do subsídio mensal</strong>. Contam como justificativa: missão oficial, falecimento na família, casamento, nascimento de filho, neto ou sobrinho, doença com atestado, acompanhamento médico de familiar e <strong>“outras justificativas apresentadas por escrito”</strong>. Por causa deste último item, “motivo particular” conta como falta justificada e não gera desconto.</p>
+            <p class="kpi__sub"><a href="http://www4.cmsandre.sp.gov.br:9000/normas/27981" target="_blank" rel="noopener">Resolução nº 8/2018</a>, arts. 1º e 2º</p>
+          </div>
+          <div class="cartao">
+            <p class="section-label">Perda do mandato</p>
+            <p>Perde o mandato o vereador que faltar a <strong>um terço das sessões ordinárias</strong> de um mesmo ano. A Lei Orgânica só exclui da conta a licença e a missão autorizada pela Câmara. O Regimento também exclui a doença comprovada. A perda é declarada pela Mesa, com direito a ampla defesa. Se o Presidente não agir, o suplente ou o Prefeito podem pedir a declaração na Justiça.</p>
+            <p class="kpi__sub"><a href="http://www4.cmsandre.sp.gov.br:9000/normas/29209" target="_blank" rel="noopener">Lei Orgânica</a>, art. 12, III e § 3º · <a href="http://www4.cmsandre.sp.gov.br:9000/normas/26807" target="_blank" rel="noopener">Regimento Interno</a>, art. 84, “c”</p>
+          </div>
+          <div class="cartao">
+            <p class="section-label">Comissões e quórum</p>
+            <p>Quem faltar a 2 reuniões seguidas, ou a 3 alternadas no mesmo mês, de uma comissão <strong>perde a vaga</strong> e não pode integrar comissões até o fim do ano. A sessão só começa com 1/3 dos vereadores presentes. Se esse número não for atingido em 15 minutos, a sessão não é realizada, e quem não compareceu fica com falta registrada em ata.</p>
+            <p class="kpi__sub"><a href="http://www4.cmsandre.sp.gov.br:9000/normas/26807" target="_blank" rel="noopener">Regimento Interno</a>, arts. 73, 106 e 119</p>
+          </div>
+        </div>
+        <div class="tabela-wrap" style="margin-top:20px"><table id="limites"></table></div>
+        <p class="kpi__sub" style="margin-top:10px">O limite de 1/3 é calculado sobre as sessões ordinárias com lista de presença publicada. A coluna “Todas as faltas” é o pior caso, porque inclui faltas justificadas, que podem não entrar na conta. As faltas da sessão derrubada por falta de quórum aparecem separadas, porque não está claro se geram desconto. Este quadro não depende dos filtros acima.</p>
       </div>
     </section>
 
@@ -236,6 +263,33 @@
               '<td style="text-align:left;white-space:normal;color:var(--text-muted)">' + A.esc(r.motivo || '—') + '</td></tr>';
           }).join('') : '<tr><td colspan="5" class="vazio">Nenhuma falta com esses filtros.</td></tr>') + '</tbody>';
       }
+
+      // Quadro das regras: por ano, limite de 1/3 das ordinárias e faltas que geram desconto (Res. 8/2018).
+      (function () {
+        var linhas = anos.map(function (a) {
+          var ords = S.filter(function (s) { return s.tipo === 'Ordinária' && s.data.slice(0, 4) === a; });
+          var limite = Math.ceil(ords.length / 3), todas = {}, desconto = {}, quorum = {};
+          ords.forEach(function (s) {
+            s.faltas.forEach(function (f) {
+              todas[f[0]] = (todas[f[0]] || 0) + 1;
+              if (f[1] !== 'Falta') return;
+              var alvo = /quórum/i.test(f[2]) ? quorum : desconto;
+              alvo[f[0]] = (alvo[f[0]] || 0) + 1;
+            });
+          });
+          function lista(o) {
+            var ks = Object.keys(o).sort(function (x, y) { return (o[y] - o[x]) || x.localeCompare(y); });
+            return ks.length ? ks.map(function (n) { return A.esc(n) + ' (' + o[n] + ')'; }).join(', ') : '—';
+          }
+          var top = Object.keys(todas).sort(function (x, y) { return todas[y] - todas[x]; }).slice(0, 3);
+          var parcial = a === anos[anos.length - 1] && a === D.atualizado_em.slice(0, 4);
+          return '<tr><td>' + a + (parcial ? ' <small style="color:var(--text-muted)">até agora</small>' : '') + '</td><td>' + ords.length + '</td><td><strong>' + limite + '</strong></td>' +
+            '<td style="text-align:left;white-space:normal">' + (top.length ? top.map(function (n) { return A.esc(n) + ' (' + todas[n] + ')'; }).join(', ') : '—') + '</td>' +
+            '<td style="text-align:left;white-space:normal">' + lista(desconto) + '</td>' +
+            '<td style="text-align:left;white-space:normal;color:var(--text-muted)">' + (Object.keys(quorum).length ? Object.keys(quorum).length + ' vereadores, 1 falta cada' : '—') + '</td></tr>';
+        });
+        document.getElementById('limites').innerHTML = '<thead><tr><th>Ano</th><th>Ordinárias</th><th>Limite (1/3)</th><th style="text-align:left">Mais faltas — todas as faltas</th><th style="text-align:left">Faltas sem justificativa (desconto de 1/30 cada)</th><th style="text-align:left">Sessão sem quórum</th></tr></thead><tbody>' + linhas.join('') + '</tbody>';
+      })();
 
       ['periodo', 'de', 'ate', 'tipo', 'vereador', 'situacao'].forEach(function (c) { el[c].addEventListener('change', aplicar); });
       document.getElementById('limpar').addEventListener('click', function () {

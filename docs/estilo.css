@@ -290,3 +290,10 @@ input[type="date"]:disabled { opacity: 0.4; }
 @media (max-width: 640px) { .mapa { grid-template-columns: 110px max-content; } }
 .rk--pres { grid-template-columns: 210px minmax(0, 1fr) 150px; }
 @media (max-width: 640px) { .rk--pres { grid-template-columns: minmax(0, 1fr) 130px; } }
+
+/* Regras de faltas (presença) */
+.regras { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.regras .cartao + .cartao { margin-top: 0; }
+.regras .cartao p + p { margin-top: 10px; }
+.regras .cartao p { font-size: 14px; color: var(--text-2); }
+.regras .cartao .section-label { color: var(--yellow); }
