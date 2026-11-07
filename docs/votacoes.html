@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Votações dos vereadores</title>
+  <meta name="description" content="Índice de concordância com o governo: como cada vereador de Santo André vota nas votações nominais da Câmara, lidas das atas oficiais." />
+  <link rel="icon" href="img/wan.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="img/wan_180.png" />
+  <meta property="og:image" content="https://welwelaraujo.github.io/projetos_santoandre/img/og.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="estilo.css?v=12" />
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav__inner container">
+      <a href="./" class="marca"><img class="marca__logo" src="img/wan.svg" alt="WAN" width="36" height="36" /><span class="marca__texto">Projetos <em>Santo André</em></span></a>
+      <ul class="nav__links">
+        <li><a href="./">Hoje</a></li>
+        <li><a href="explorar.html">Explorar</a></li>
+        <li><a href="vereadores.html">Vereadores</a></li>
+        <li><a href="presenca.html">Presença</a></li>
+        <li><a href="votacoes.html" aria-current="page">Votações</a></li>
+        <li><a href="sobre.html">Sobre</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="container">
+      <p class="section-label">Votações nominais</p>
+      <h1 class="hero__title">Quem vota <em>com o governo</em></h1>
+      <p class="hero__lede">Como cada vereador votou em todas as votações nominais da Câmara de Santo André desde 2025, lidas das atas oficiais das sessões. O índice mostra em quantas votações o vereador votou igual ao líder do governo na Câmara.</p>
+      <div class="hero__meta"><span>Atualizado em <b data-atualizado-vot>—</b></span><span>Atas até <b data-ultima-ata>—</b></span><span>Fonte: atas taquigráficas da Câmara</span></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="secao">
+      <div class="container">
+        <form class="filtros" id="filtros" onsubmit="return false">
+          <label>Período<select id="periodo"></select></label>
+          <label>Matérias<select id="materia">
+            <option value="">Da Prefeitura</option>
+            <option value="todas">Todas</option>
+          </select></label>
+          <label>Votações<select id="escopo">
+            <option value="">Só as divididas</option>
+            <option value="todas">Todas, com as unânimes</option>
+          </select></label>
+          <label>Vereador<select id="vereador"></select></label>
+        </form>
+        <div class="resumo-busca">
+          <span id="contagem">Carregando…</span>
+          <button type="button" class="btn btn--outline btn--sm" id="limpar">Limpar filtros</button>
+        </div>
+        <div class="kpis" id="kpis"></div>
+      </div>
+    </section>
+
+    <section class="secao">
+      <div class="container">
+        <p class="section-label">Índice</p>
+        <h2 class="secao__titulo">Concordância com o governo, por vereador</h2>
+        <p class="secao__intro">Percentual das votações em que o vereador votou igual ao líder do governo, contando só as votações em que ele votou a favor ou contra. Ausências, abstenções e “não votou” não entram no cálculo e aparecem em cinza. Clique num nome para ver os votos dele.</p>
+        <div class="cartao">
+          <div class="legenda" id="legenda"></div>
+          <div class="ranking" id="ranking"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="secao">
+      <div class="container">
+        <p class="section-label">Voto a voto</p>
+        <h2 class="secao__titulo">Mapa das votações</h2>
+        <p class="secao__intro">Cada coluna é uma votação, da mais antiga à mais recente. Passe o mouse ou toque num quadrado para ver a matéria e o voto. Clique para abrir a ata.</p>
+        <div class="cartao"><div class="mapa-wrap" id="mapa"></div></div>
+      </div>
+    </section>
+
+    <section class="secao">
+      <div class="container">
+        <p class="section-label">Registros</p>
+        <h2 class="secao__titulo" id="titulo-tabela">Votações</h2>
+        <div class="tabela-wrap"><table id="tabela"></table></div>
+      </div>
+    </section>
+
+    <section class="secao">
+      <div class="container">
+        <p class="section-label">Método</p>
+        <h2 class="secao__titulo">Como o índice é calculado</h2>
+        <div class="regras">
+          <div class="cartao">
+            <p class="section-label">De onde vêm os votos</p>
+            <p>O portal Câmara sem Papel não publica o voto de cada vereador. Os votos nominais estão nas <strong>atas taquigráficas</strong> das sessões ordinárias, que a Câmara publica em PDF algumas semanas depois de cada sessão. O site lê todas as atas desde fevereiro de 2025 e extrai, de cada votação, quem votou a favor, contra, se absteve ou não votou.</p>
+            <p class="kpi__sub"><a href="http://www6.cmsandre.sp.gov.br:9002/atas-taquigraficas/?categoria=ORDINARIA" target="_blank" rel="noopener">Portal de Publicações da Câmara – Atas Taquigráficas</a></p>
+          </div>
+          <div class="cartao">
+            <p class="section-label">Qual é a posição do governo</p>
+            <p>A posição do governo em cada votação é o voto do <strong>líder do governo na Câmara</strong>, <span data-lider>—</span>. Em projetos do Executivo, votar a favor costuma ser votar com o governo; em vetos, votar pela manutenção do veto. Votações em que o líder não votou ficam fora do índice. Votações simbólicas, sem registro nominal na ata, também não entram.</p>
+          </div>
+          <div class="cartao">
+            <p class="section-label">Limites</p>
+            <p>Concordar com o governo não é bom nem ruim por si: projeto bom deve ser aprovado. O índice mostra o padrão de voto, não a qualidade dele. Em algumas atas o placar anunciado não bate com a lista de nomes (normalmente falta um nome). O site usa a lista de nomes. Quando uma votação unânime vem sem nomes, conta a favor quem votou nas outras votações da mesma sessão, menos os ausentes.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <a href="./" class="marca"><img class="marca__logo" src="img/wan.svg" alt="WAN" width="36" height="36" /></a>
+      <nav class="footer__links">
+        <a href="./">Hoje</a>
+        <a href="explorar.html">Explorar</a>
+        <a href="vereadores.html">Vereadores</a>
+        <a href="presenca.html">Presença</a>
+        <a href="votacoes.html">Votações</a>
+        <a href="sobre.html">Sobre</a>
+      </nav>
+      <p class="footer__info">Fonte: atas taquigráficas e portal Câmara sem Papel, da Câmara Municipal de Santo André. Consulte sempre o texto oficial.</p>
+    </div>
+    <p class="footer__credito container">Desenvolvido por: <strong>Wellington Araujo Nogueira</strong> · <a href="mailto:wellingtonaraujonogueira@outlook.com">wellingtonaraujonogueira@outlook.com</a> · LinkedIn: <a href="https://www.linkedin.com/in/wellingtonaraujonogueira/" target="_blank" rel="noopener">linkedin.com/in/wellingtonaraujonogueira</a></p>
+  </footer>
+
+  <script src="app.js?v=3"></script>
+  <script>
+  (function () {
+    var A = window.APP;
+    var COR = { com: '#FCBD27', contra: '#5b8def', outro: '#4a4a4a' };
+    var ATA = 'http://www6.cmsandre.sp.gov.br:9002/atas-taquigraficas/';
+    var CAMPOS = ['periodo', 'materia', 'escopo', 'vereador'];
+    var el = {};
+    CAMPOS.forEach(function (c) { el[c] = document.getElementById(c); });
+
+    function capital(s) { s = String(s || '').toLowerCase(); return s.charAt(0).toUpperCase() + s.slice(1); }
+    function pct(n) { return n.toFixed(1).replace('.', ',') + '%'; }
+
+    fetch('dados/votacoes.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (D) {
+      document.querySelector('[data-atualizado-vot]').textContent = A.dataHora(D.atualizado_em);
+      document.querySelector('[data-lider]').textContent = D.lider;
+      var V = [];
+      D.atas.forEach(function (a) {
+        a.votacoes.forEach(function (v, i) {
+          v.ata = a; v.n = i;
+          v.dividida = v.fav.length > 0 && v.contra.length > 0;
+          v.voto = {};
+          ['fav', 'contra', 'abst', 'nao_votou'].forEach(function (k) { v[k].forEach(function (n) { v.voto[n] = k; }); });
+          V.push(v);
+        });
+      });
+      var ultima = D.atas[D.atas.length - 1];
+      document.querySelector('[data-ultima-ata]').textContent = ultima ? ultima.sessao + 'ª sessão, ' + A.data(ultima.data) : '—';
+
+      var anos = Object.keys(D.atas.reduce(function (o, a) { o[a.data.slice(0, 4)] = 1; return o; }, {})).sort();
+      el.periodo.innerHTML = '<option value="">Legislatura (desde 2025)</option>' + anos.map(function (a) { return '<option value="' + a + '">' + a + '</option>'; }).join('');
+      var cont = {};
+      V.forEach(function (v) { Object.keys(v.voto).forEach(function (n) { cont[n] = (cont[n] || 0) + 1; }); });
+      el.vereador.innerHTML = '<option value="">Todos</option>' + Object.keys(cont).sort(function (a, b) { return a.localeCompare(b); })
+        .map(function (n) { return '<option>' + A.esc(n) + '</option>'; }).join('');
+      document.getElementById('legenda').innerHTML = '<div class="legenda">' +
+        '<span><i style="background:' + COR.com + '"></i>Votou com o governo</span>' +
+        '<span><i style="background:' + COR.contra + '"></i>Votou contra o governo</span>' +
+        '<span><i style="background:' + COR.outro + '"></i>Absteve-se ou não votou</span></div>';
+
+      var url = new URLSearchParams(location.search);
+      CAMPOS.forEach(function (c) { if (url.get(c)) el[c].value = url.get(c); });
+
+      function rotuloVoto(v, n) {
+        var k = v.voto[n];
+        if (!k) return 'Ausente';
+        if (k === 'abst') return 'Absteve-se';
+        if (k === 'nao_votou') return 'Não votou';
+        return (k === 'fav' ? 'A favor' : 'Contra') + (v.governo ? (k === v.governo ? ' (com o governo)' : ' (contra o governo)') : '');
+      }
+      function corVoto(v, n) {
+        var k = v.voto[n];
+        if (!k) return 'transparent';
+        if (k === 'abst' || k === 'nao_votou' || !v.governo) return COR.outro;
+        return k === v.governo ? COR.com : COR.contra;
+      }
+      function materia(v) {
+        return (v.projeto ? '<strong>' + A.esc(v.projeto) + '</strong>' + (v.autor ? ' · ' + A.esc(capital(v.autor)) : '') + '<br>' : '') +
+          '<span style="color:var(--text-muted)">' + A.esc(v.ementa) + '</span>';
+      }
+
+      function aplicar() {
+        var ano = el.periodo.value, ver = el.vereador.value;
+        var lista = V.filter(function (v) {
+          return v.governo && (!ano || v.ata.data.slice(0, 4) === ano) &&
+            (el.materia.value === 'todas' || v.prefeitura) && (el.escopo.value === 'todas' || v.dividida);
+        });
+        var u = new URLSearchParams();
+        CAMPOS.forEach(function (c) { if (el[c].value) u.set(c, el[c].value); });
+        history.replaceState(null, '', location.pathname + (u.toString() ? '?' + u : ''));
+
+        // Índice por vereador.
+        var por = {};
+        lista.forEach(function (v) {
+          Object.keys(v.voto).forEach(function (n) {
+            var r = por[n] = por[n] || { nome: n, com: 0, contra: 0, outro: 0 };
+            var k = v.voto[n];
+            if (k === v.governo) r.com++;
+            else if (k === 'fav' || k === 'contra') r.contra++;
+            else r.outro++;
+          });
+        });
+        var rk = Object.keys(por).map(function (k) { var r = por[k]; r.validos = r.com + r.contra; r.indice = r.validos ? 100 * r.com / r.validos : 0; return r; })
+          .filter(function (r) { return r.validos >= Math.min(10, Math.ceil(lista.length / 4)); });
+        rk.sort(function (a, b) { return (b.indice - a.indice) || (a.contra - b.contra) || a.nome.localeCompare(b.nome); });
+
+        // Destaques.
+        var semContra = V.filter(function (v) {
+          return v.governo && (!ano || v.ata.data.slice(0, 4) === ano) && (el.materia.value === 'todas' || v.prefeitura);
+        });
+        var unanimes = semContra.filter(function (v) { return !v[v.governo === 'fav' ? 'contra' : 'fav'].length; }).length;
+        var media = rk.length ? rk.reduce(function (s, r) { return s + r.indice; }, 0) / rk.length : 0;
+        var alvo = ver ? por[ver] : null;
+        document.getElementById('contagem').innerHTML = '<strong>' + lista.length + '</strong> votações no recorte' + (ver ? ' · ' + A.esc(ver) : '');
+        var kpis = [
+          ['Votações nominais', semContra.length, el.materia.value === 'todas' ? 'com posição do governo' : 'de matérias da Prefeitura', 'var(--yellow)'],
+          ['Sem voto contra o governo', semContra.length ? pct(100 * unanimes / semContra.length) : '—', A.int(unanimes) + ' votações em que ninguém divergiu', COR.com],
+          ['Votações divididas', semContra.length - unanimes, 'pelo menos um vereador votou contra o governo', COR.contra]
+        ];
+        if (alvo) kpis.push(['Índice de ' + ver, alvo.validos ? pct(alvo.indice) : '—', alvo.com + ' com o governo · ' + alvo.contra + ' contra', COR.com]);
+        else kpis.push(['Média da Câmara', pct(media), 'índice médio dos vereadores no recorte', COR.com]);
+        document.getElementById('kpis').innerHTML = kpis.map(function (k) {
+          return '<div class="kpi" style="--kpi-cor:' + k[3] + '"><div class="kpi__rotulo">' + A.esc(k[0]) + '</div><div class="kpi__valor">' + (typeof k[1] === 'number' ? A.int(k[1]) : k[1]) + '</div><div class="kpi__sub">' + k[2] + '</div></div>';
+        }).join('');
+
+        document.getElementById('ranking').innerHTML = rk.map(function (r) {
+          var tot = r.com + r.contra + r.outro;
+          var segs = [['com', 'Com o governo'], ['contra', 'Contra o governo'], ['outro', 'Absteve-se ou não votou']].filter(function (k) { return r[k[0]]; }).map(function (k) {
+            return '<i style="width:' + (r[k[0]] / tot * 100) + '%;background:' + COR[k[0]] + '" data-dica="<b>' + A.esc(r.nome) + '</b><br>' + k[1] + ': ' + r[k[0]] + ' de ' + tot + '"></i>';
+          }).join('');
+          return '<a class="rk rk--res rk--pres' + (ver && ver !== r.nome ? ' rk--apagado' : '') + '" href="?' + new URLSearchParams(Object.assign(Object.fromEntries(u), { vereador: r.nome })) + '">' +
+            '<span class="rk__nome">' + A.esc(r.nome) + '</span><span class="rk__barra">' + segs + '</span>' +
+            '<span class="rk__total">' + r.indice.toFixed(0) + '%<small>' + r.contra + ' contra · ' + r.validos + ' votos</small></span></a>';
+        }).join('') || '<p class="vazio">Nenhuma votação no recorte.</p>';
+
+        // Mapa vereador × votação.
+        var linhas = ver ? [ver] : rk.map(function (r) { return r.nome; });
+        document.getElementById('mapa').innerHTML = lista.length ? '<div class="mapa" style="--n:' + lista.length + '">' + linhas.map(function (n) {
+          return '<div class="mapa__nome">' + A.esc(n) + '</div><div class="mapa__linha">' + lista.map(function (v) {
+            var dica = '<b>' + A.esc(n) + ': ' + rotuloVoto(v, n) + '</b><br>' + A.data(v.ata.data) + ' · ' + v.ata.sessao + 'ª sessão<br>' +
+              A.esc(v.projeto || '') + ' · ' + A.esc(capital(v.resultado)) + '<br>' + A.esc(v.ementa.slice(0, 140));
+            return '<a class="mapa__c" href="' + ATA + v.ata.id + '" target="_blank" rel="noopener" style="background:' + corVoto(v, n) + '" data-dica="' + dica.replace(/"/g, '&quot;') + '"></a>';
+          }).join('') + '</div>';
+        }).join('') + '</div>' : '<p class="vazio">Nenhuma votação no recorte.</p>';
+
+        // Tabela.
+        var ordenadas = lista.slice().sort(function (a, b) { return b.ata.data.localeCompare(a.ata.data) || b.n - a.n; });
+        document.getElementById('titulo-tabela').textContent = ver ? 'Votos de ' + ver : 'Votações';
+        document.getElementById('tabela').innerHTML = '<thead><tr><th>Data</th><th>Sessão</th><th style="text-align:left">Matéria</th><th>Resultado</th><th>Placar</th>' +
+          (ver ? '<th style="text-align:left">Voto de ' + A.esc(ver) + '</th>' : '<th style="text-align:left">Votaram contra o governo</th>') + '</tr></thead><tbody>' +
+          (ordenadas.length ? ordenadas.map(function (v) {
+            var oposto = v.governo === 'fav' ? 'contra' : 'fav';
+            var ultima = ver ? '<span class="sit sit--' + (v.voto[ver] === v.governo ? 'pauta' : v.voto[ver] === oposto ? 'nao' : 'neutro') + '">' + rotuloVoto(v, ver) + '</span>'
+              : (v[oposto].length ? v[oposto].map(A.esc).join(', ') : '—');
+            return '<tr><td>' + A.data(v.ata.data) + '</td><td><a href="' + ATA + v.ata.id + '" target="_blank" rel="noopener" style="color:inherit">' + v.ata.sessao + 'ª</a></td>' +
+              '<td style="text-align:left;white-space:normal;min-width:280px">' + materia(v) + '</td><td>' + A.esc(capital(v.resultado)) + '</td>' +
+              '<td>' + v.fav.length + ' × ' + v.contra.length + '<br><small style="color:var(--text-muted)">governo ' + (v.governo === 'fav' ? 'a favor' : 'contra') + '</small></td>' +
+              '<td style="text-align:left;white-space:normal">' + ultima + '</td></tr>';
+          }).join('') : '<tr><td colspan="6" class="vazio">Nenhuma votação com esses filtros.</td></tr>') + '</tbody>';
+      }
+
+      CAMPOS.forEach(function (c) { el[c].addEventListener('change', aplicar); });
+      document.getElementById('limpar').addEventListener('click', function () {
+        CAMPOS.forEach(function (c) { el[c].value = ''; });
+        aplicar();
+      });
+      aplicar();
+    });
+  })();
+  </script>
+</body>
+</html>

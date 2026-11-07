@@ -330,6 +330,11 @@ def atualizar_sessoes(sessao, proposicoes, agora):
         sessoes.historico_presenca(sessao, DADOS / "presencas.json", agora)
     except Exception as erro:
         print(f"sessões não atualizadas: {erro}", file=sys.stderr)
+    try:
+        import votacoes
+        votacoes.atualizar(DADOS / "votacoes.json", agora)
+    except Exception as erro:
+        print(f"votações não atualizadas: {erro}", file=sys.stderr)
 
 
 if __name__ == "__main__":
