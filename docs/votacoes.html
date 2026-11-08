@@ -12,6 +12,36 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="estilo.css?v=12" />
+  <style>
+    .vts { display: grid; gap: 14px; }
+    .vt { border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; background: rgba(255,255,255,0.02); }
+    .vt__topo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: 12.5px; color: var(--text-muted); }
+    .vt__topo a { color: inherit; }
+    .vt__corpo { display: grid; grid-template-columns: 1fr auto; gap: 16px; margin-top: 10px; align-items: start; }
+    .vt__materia { font-size: 14px; line-height: 1.5; }
+    .vt__materia span { color: var(--text-muted); }
+    .vt__placar { text-align: center; min-width: 120px; }
+    .vt__num { font-size: 34px; font-weight: 900; line-height: 1; white-space: nowrap; }
+    .vt__num small { font-size: 20px; color: var(--text-muted); font-weight: 600; margin: 0 4px; }
+    .vt__num-rot { display: flex; justify-content: space-between; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); margin-top: 4px; }
+    .vt__barra { display: flex; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 6px; background: #2a2a2a; }
+    .vt__grupos { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+    .vt__grupo h4 { margin: 0 0 6px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-2); }
+    .vt__grupo--largo { grid-column: 1 / -1; }
+    .vt__nomes { display: flex; flex-wrap: wrap; gap: 5px; }
+    .vt__nome { font-size: 12px; padding: 2px 8px; border-radius: 3px; border: 1px solid transparent; white-space: nowrap; }
+    .vt__nome--com { background: rgba(252,189,39,0.14); color: #FCBD27; border-color: rgba(252,189,39,0.4); }
+    .vt__nome--contra { background: rgba(91,141,239,0.16); color: #8fb0f5; border-color: rgba(91,141,239,0.5); }
+    .vt__nome--outro { background: rgba(255,255,255,0.05); color: var(--text-muted); border-color: rgba(255,255,255,0.15); }
+    .vt__nome--eu { outline: 2px solid #fff; outline-offset: 1px; font-weight: 800; }
+    .vt__nomes--poucos .vt__nome { font-size: 11.5px; }
+    @media (max-width: 640px) {
+      .vt { padding: 14px; }
+      .vt__corpo { grid-template-columns: 1fr; }
+      .vt__placar { text-align: left; max-width: 170px; }
+      .vt__grupos { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
 
@@ -86,7 +116,9 @@
       <div class="container">
         <p class="section-label">Registros</p>
         <h2 class="secao__titulo" id="titulo-tabela">Votações</h2>
-        <div class="tabela-wrap"><table id="tabela"></table></div>
+        <p class="secao__intro">Uma votação por cartão, da mais recente à mais antiga. Amarelo: votou com o governo. Azul: votou contra o governo.</p>
+        <div class="vts" id="tabela"></div>
+        <div style="text-align:center;margin-top:20px"><button type="button" class="btn btn--outline btn--sm" id="mais" hidden>Mostrar mais votações</button></div>
       </div>
     </section>
 
@@ -147,6 +179,10 @@
       document.querySelector('[data-lider]').textContent = D.lider;
       var V = [];
       D.atas.forEach(function (a) {
+        // Plenário da sessão: quem votou em alguma votação da ata. Quem não aparece numa votação estava ausente.
+        var pl = {};
+        a.votacoes.forEach(function (v) { ['fav', 'contra', 'abst', 'nao_votou'].forEach(function (k) { v[k].forEach(function (n) { pl[n] = 1; }); }); });
+        a.plenario = Object.keys(pl);
         a.votacoes.forEach(function (v, i) {
           v.ata = a; v.n = i;
           v.dividida = v.fav.length > 0 && v.contra.length > 0;
@@ -254,21 +290,50 @@
           }).join('') + '</div>';
         }).join('') + '</div>' : '<p class="vazio">Nenhuma votação no recorte.</p>';
 
-        // Tabela.
-        var ordenadas = lista.slice().sort(function (a, b) { return b.ata.data.localeCompare(a.ata.data) || b.n - a.n; });
-        document.getElementById('titulo-tabela').textContent = ver ? 'Votos de ' + ver : 'Votações';
-        document.getElementById('tabela').innerHTML = '<thead><tr><th>Data</th><th>Sessão</th><th style="text-align:left">Matéria</th><th>Resultado</th><th>Placar</th>' +
-          (ver ? '<th style="text-align:left">Voto de ' + A.esc(ver) + '</th>' : '<th style="text-align:left">Votaram contra o governo</th>') + '</tr></thead><tbody>' +
-          (ordenadas.length ? ordenadas.map(function (v) {
-            var oposto = v.governo === 'fav' ? 'contra' : 'fav';
-            var ultima = ver ? '<span class="sit sit--' + (v.voto[ver] === v.governo ? 'pauta' : v.voto[ver] === oposto ? 'nao' : 'neutro') + '">' + rotuloVoto(v, ver) + '</span>'
-              : (v[oposto].length ? v[oposto].map(A.esc).join(', ') : '—');
-            return '<tr><td>' + A.data(v.ata.data) + '</td><td><a href="' + ATA + v.ata.id + '" target="_blank" rel="noopener" style="color:inherit">' + v.ata.sessao + 'ª</a></td>' +
-              '<td style="text-align:left;white-space:normal;min-width:280px">' + materia(v) + '</td><td>' + A.esc(capital(v.resultado)) + '</td>' +
-              '<td>' + v.fav.length + ' × ' + v.contra.length + '<br><small style="color:var(--text-muted)">governo ' + (v.governo === 'fav' ? 'a favor' : 'contra') + '</small></td>' +
-              '<td style="text-align:left;white-space:normal">' + ultima + '</td></tr>';
-          }).join('') : '<tr><td colspan="6" class="vazio">Nenhuma votação com esses filtros.</td></tr>') + '</tbody>';
+        // Cartões, um por votação.
+        ordenadas = lista.slice().sort(function (a, b) { return b.ata.data.localeCompare(a.ata.data) || b.n - a.n; });
+        document.getElementById('titulo-tabela').textContent = ver ? 'Votos de ' + ver : 'Como cada vereador votou';
+        mostradas = POR_PAGINA;
+        cartoes();
       }
+
+      var ordenadas = [], mostradas = 0, POR_PAGINA = 30;
+      function nomes(v, lista, ver) {
+        if (!lista.length) return '<span style="color:var(--text-muted);font-size:12px">ninguém</span>';
+        return lista.slice().sort(function (a, b) { return a.localeCompare(b); }).map(function (n) {
+          var k = v.voto[n], cls = !k || k === 'abst' || k === 'nao_votou' ? 'outro' : k === v.governo ? 'com' : 'contra';
+          return '<span class="vt__nome vt__nome--' + cls + (n === ver ? ' vt__nome--eu' : '') + '">' + A.esc(n) + '</span>';
+        }).join('');
+      }
+      function cartoes() {
+        var ver = el.vereador.value;
+        var html = ordenadas.slice(0, mostradas).map(function (v) {
+          var oposto = v.governo === 'fav' ? 'contra' : 'fav';
+          var ausentes = v.ata.plenario.filter(function (n) { return !v.voto[n]; });
+          var outros = v.abst.length + v.nao_votou.length;
+          var tot = v.fav.length + v.contra.length || 1;
+          var corFav = v.governo === 'fav' ? COR.com : COR.contra, corContra = v.governo === 'fav' ? COR.contra : COR.com;
+          var aprovado = /APROVAD|MANTID/i.test(v.resultado);
+          var topo = '<span>' + A.data(v.ata.data) + '</span><a href="' + ATA + v.ata.id + '" target="_blank" rel="noopener">' + v.ata.sessao + 'ª sessão · ver ata</a>' +
+            '<span class="sit sit--' + (aprovado ? 'ok' : 'nao') + '">' + A.esc(capital(v.resultado)) + '</span>' +
+            '<span>Governo votou <b style="color:' + COR.com + '">' + (v.governo === 'fav' ? 'a favor' : 'contra') + '</b></span>' +
+            (ver ? '<span class="sit sit--' + (v.voto[ver] === v.governo ? 'pauta' : v.voto[ver] === oposto ? 'nao' : 'neutro') + '">' + A.esc(ver) + ': ' + rotuloVoto(v, ver) + '</span>' : '');
+          var placar = '<div class="vt__placar"><div class="vt__num"><span style="color:' + corFav + '">' + v.fav.length + '</span><small>×</small><span style="color:' + corContra + '">' + v.contra.length + '</span></div>' +
+            '<div class="vt__num-rot"><span>a favor</span><span>contra</span></div>' +
+            '<div class="vt__barra"><i style="width:' + (100 * v.fav.length / tot) + '%;background:' + corFav + '"></i><i style="width:' + (100 * v.contra.length / tot) + '%;background:' + corContra + '"></i></div></div>';
+          var grupos = '<div class="vt__grupo"><h4>A favor (' + v.fav.length + ')</h4><div class="vt__nomes">' + nomes(v, v.fav, ver) + '</div></div>' +
+            '<div class="vt__grupo"><h4>Contra (' + v.contra.length + ')</h4><div class="vt__nomes">' + nomes(v, v.contra, ver) + '</div></div>' +
+            (outros ? '<div class="vt__grupo vt__grupo--largo"><h4>Absteve-se ou não votou (' + outros + ')</h4><div class="vt__nomes">' + nomes(v, v.abst.concat(v.nao_votou), ver) + '</div></div>' : '') +
+            (ausentes.length ? '<div class="vt__grupo vt__grupo--largo"><h4>Ausentes (' + ausentes.length + ')</h4><div class="vt__nomes">' + nomes(v, ausentes, ver) + '</div></div>' : '');
+          return '<article class="vt"><div class="vt__topo">' + topo + '</div><div class="vt__corpo"><div class="vt__materia">' + materia(v) + '</div>' + placar + '</div>' +
+            '<div class="vt__grupos">' + grupos + '</div></article>';
+        }).join('');
+        document.getElementById('tabela').innerHTML = html || '<p class="vazio">Nenhuma votação com esses filtros.</p>';
+        var mais = document.getElementById('mais');
+        mais.hidden = mostradas >= ordenadas.length;
+        mais.textContent = 'Mostrar mais votações (' + (ordenadas.length - mostradas) + ' restantes)';
+      }
+      document.getElementById('mais').addEventListener('click', function () { mostradas += POR_PAGINA; cartoes(); });
 
       CAMPOS.forEach(function (c) { el[c].addEventListener('change', aplicar); });
       document.getElementById('limpar').addEventListener('click', function () {
