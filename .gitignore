@@ -1,3 +1,6 @@
 __pycache__/
 *.pyc
 scripts/rotina_diaria.log
+
+# IDs do Apps Script e da planilha de assinaturas ficam só nesta máquina (usados pelo clasp).
+apps-script/.clasp.json
