@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Abaixo-assinado pela transparência</title>
+  <meta name="description" content="Abaixo-assinado pela transparência dos gastos de Santo André e por audiências públicas em horário que quem trabalha possa participar." />
+  <link rel="icon" href="img/wan.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="img/wan_180.png" />
+  <meta property="og:image" content="https://welwelaraujo.github.io/projetos_santoandre/img/og.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="estilo.css?v=16" />
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav__inner container">
+      <a href="./" class="marca"><img class="marca__logo" src="img/wan.svg" alt="WAN" width="36" height="36" /><span class="marca__texto">Projetos <em>Santo André</em></span></a>
+      <ul class="nav__links">
+        <li><a href="./">Hoje</a></li>
+        <li><a href="explorar.html">Explorar</a></li>
+        <li><a href="vereadores.html">Vereadores</a></li>
+        <li><a href="presenca.html">Presença</a></li>
+        <li><a href="votacoes.html">Votações</a></li>
+        <li><a href="sobre.html">Sobre</a></li>
+        <li><a href="abaixo-assinado.html" class="nav__cta" aria-current="page">Abaixo-assinado</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="cad container">
+    <div class="cad__grid">
+      <div>
+        <p class="cad__selo">Abaixo-assinado</p>
+        <h1 class="cad__titulo">Transparência nos gastos de <em>Santo André</em></h1>
+        <p class="cad__texto">O dinheiro da cidade é nosso, mas a <strong>Prefeitura</strong> e a <strong>Câmara de Santo André</strong> não prestam contas como deveriam. O que é publicado está escondido em sistemas confusos e documentos difíceis de encontrar e de entender.</p>
+        <p class="cad__texto">E tudo parece pensado para que a população <strong>não participe</strong>:</p>
+        <ul class="cad__fatos">
+          <li><span>As <strong>sessões da Câmara</strong> acontecem às terças-feiras, de manhã e à tarde, em horário em que quem trabalha não pode estar lá.</span></li>
+          <li><span>As <strong>audiências públicas</strong>, onde se discute o orçamento, são marcadas em <strong>horário comercial</strong>, no meio da semana.</span></li>
+          <li><span>Quem tenta acompanhar de casa encontra o <strong>chat da transmissão no YouTube fechado</strong>. Não dá nem para perguntar.</span></li>
+          <li><span>A <strong>Ordem do Dia</strong>, a lista do que vai ser votado, é publicada <strong>em cima da hora</strong>. Não dá tempo de se informar, se organizar e pressionar os vereadores antes de uma votação polêmica.</span></li>
+          <li><span>O sistema da Câmara <strong>não mostra como cada vereador votou</strong>. Isso só aparece nas atas em PDF, publicadas semanas depois da votação.</span></li>
+          <li><span>Enquanto isso, os vereadores ganham <strong>cerca de R$ 25 mil por mês</strong>, e a presença obrigatória no plenário é de <strong>um dia por semana</strong>.</span></li>
+        </ul>
+        <p class="cad__texto">A Lei de Responsabilidade Fiscal manda incentivar a participação popular. Participação que só cabe no horário de expediente, com a pauta divulgada em cima da hora, o chat fechado e o voto escondido em PDF, <strong>não é participação. É fachada.</strong></p>
+
+        <h2 class="cad__subtitulo">O que exigimos</h2>
+        <ol class="cad__pedidos">
+          <li><span><strong>Sessões e audiências públicas à noite ou aos sábados</strong>, para que quem trabalha possa participar.</span></li>
+          <li><span><strong>Chat aberto nas transmissões</strong> e perguntas da população pela internet, lidas e respondidas na hora.</span></li>
+          <li><span><strong>Ordem do Dia publicada com pelo menos dois dias de antecedência</strong>, para que a população saiba o que vai ser votado e possa se manifestar.</span></li>
+          <li><span><strong>O voto de cada vereador publicado no mesmo dia</strong>, no site da Câmara, sem depender de ata em PDF.</span></li>
+          <li><span><strong>Gastos publicados em linguagem simples</strong>: contratos, licitações, pagamentos e salários atualizados, fáceis de buscar e em dados abertos.</span></li>
+          <li><span><strong>Divulgação das audiências com antecedência</strong>, no site, nas redes sociais e nos bairros.</span></li>
+        </ol>
+        <p class="cad__nota">O abaixo-assinado será protocolado na Câmara Municipal e na Prefeitura de Santo André.</p>
+      </div>
+
+      <div class="cad__caixa">
+        <p class="cad__contador" data-total-assinaturas hidden><strong></strong> <span>pessoas já assinaram</span></p>
+        <form class="form" id="form-abaixo" novalidate>
+          <div class="form__group">
+            <label for="f-nome">Nome completo</label>
+            <input id="f-nome" name="nome" type="text" autocomplete="name" placeholder="Seu nome completo" />
+            <span class="form__erro"></span>
+          </div>
+          <div class="form__group">
+            <label for="f-email">E-mail</label>
+            <input id="f-email" name="email" type="email" autocomplete="email" placeholder="voce@email.com" />
+            <span class="form__erro"></span>
+          </div>
+          <div class="form__group">
+            <label for="f-whatsapp">WhatsApp</label>
+            <input id="f-whatsapp" name="whatsapp" type="tel" autocomplete="tel" inputmode="numeric" placeholder="(11) 99999-9999" />
+            <span class="form__erro"></span>
+          </div>
+
+          <fieldset class="endereco">
+            <legend>Endereço</legend>
+            <div class="form__row form__row--cep">
+              <div class="form__group">
+                <label for="f-cep">CEP</label>
+                <input id="f-cep" name="cep" type="text" inputmode="numeric" autocomplete="postal-code" placeholder="09000-000" />
+                <span class="form__erro"></span>
+              </div>
+              <p class="endereco__aviso" role="status"></p>
+            </div>
+            <div class="form__group">
+              <label for="f-rua">Rua / avenida</label>
+              <input id="f-rua" name="rua" type="text" autocomplete="address-line1" />
+              <span class="form__erro"></span>
+            </div>
+            <div class="form__row">
+              <div class="form__group">
+                <label for="f-numero">Número</label>
+                <input id="f-numero" name="numero" type="text" inputmode="numeric" />
+                <span class="form__erro"></span>
+              </div>
+              <div class="form__group">
+                <label for="f-complemento">Complemento</label>
+                <input id="f-complemento" name="complemento" type="text" autocomplete="address-line2" placeholder="Opcional" />
+                <span class="form__erro"></span>
+              </div>
+            </div>
+            <div class="form__group">
+              <label for="f-bairro">Bairro</label>
+              <input id="f-bairro" name="bairro" type="text" />
+              <span class="form__erro"></span>
+            </div>
+            <div class="form__row form__row--cidade">
+              <div class="form__group">
+                <label for="f-cidade">Cidade</label>
+                <input id="f-cidade" name="cidade" type="text" autocomplete="address-level2" />
+                <span class="form__erro"></span>
+              </div>
+              <div class="form__group">
+                <label for="f-uf">UF</label>
+                <input id="f-uf" name="uf" type="text" maxlength="2" autocomplete="address-level1" />
+                <span class="form__erro"></span>
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="form__hp" aria-hidden="true">
+            <label for="f-site">Não preencha</label>
+            <input id="f-site" name="site" type="text" tabindex="-1" autocomplete="off" />
+          </div>
+          <label class="lgpd">
+            <input type="checkbox" name="lgpd" id="f-lgpd" />
+            <span>Assino este abaixo-assinado e autorizo o uso dos meus dados para registrar a assinatura e receber novidades sobre ele. Meu nome e meu bairro poderão constar na lista entregue à Câmara e à Prefeitura. Li a <a href="privacidade.html" target="_blank">política de privacidade</a>.</span>
+          </label>
+          <span class="form__erro"></span>
+          <button type="submit" class="btn btn--yellow btn--lg">Assinar o abaixo-assinado</button>
+          <p class="form__msg" role="status"></p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <a href="./" class="marca"><img class="marca__logo" src="img/wan.svg" alt="WAN" width="36" height="36" /></a>
+      <nav class="footer__links">
+        <a href="./">Hoje</a>
+        <a href="explorar.html">Explorar</a>
+        <a href="vereadores.html">Vereadores</a>
+        <a href="presenca.html">Presença</a>
+        <a href="votacoes.html">Votações</a>
+        <a href="sobre.html">Sobre</a>
+        <a href="abaixo-assinado.html">Abaixo-assinado</a>
+        <a href="privacidade.html">Privacidade</a>
+      </nav>
+      <p class="footer__info">Fonte: portal Câmara sem Papel, da Câmara Municipal de Santo André. Consulte sempre o texto oficial.</p>
+    </div>
+    <p class="footer__credito container">Desenvolvido por: <strong>Wellington Araujo Nogueira</strong> · <a href="mailto:wellingtonaraujonogueira@outlook.com">wellingtonaraujonogueira@outlook.com</a> · LinkedIn: <a href="https://www.linkedin.com/in/wellingtonaraujonogueira/" target="_blank" rel="noopener">linkedin.com/in/wellingtonaraujonogueira</a></p>
+  </footer>
+
+  <script src="cadastro.js?v=3"></script>
+  <script>
+  iniciarCadastro({
+    form: document.getElementById('form-abaixo'),
+    formulario: 'abaixo-assinado',
+    obrigatorios: ['nome', 'email', 'whatsapp', 'cep', 'rua', 'numero', 'bairro', 'cidade', 'uf'],
+    extras: ['complemento'],
+    concluir: function () {
+      this.form.innerHTML = '<p class="cad__selo">Assinatura registrada</p><p class="cad__ok">Obrigado por assinar! Compartilhe com quem também quer saber como o dinheiro da cidade é gasto.</p><a href="./" class="btn btn--outline">Voltar ao site</a>';
+    },
+  });
+  mostrarTotalAssinaturas();
+  </script>
+</body>
+</html>

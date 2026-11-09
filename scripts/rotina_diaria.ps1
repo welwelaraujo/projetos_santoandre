@@ -11,7 +11,7 @@ function Registrar($msg) { "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') $msg" | Ou
 
 try {
     Registrar 'início'
-    git pull --quiet --rebase
+    git pull --quiet --rebase --autostash
     # Via cmd: no PowerShell 5.1, o stderr do Python redirecionado vira erro e interrompe com 'Stop'.
     $env:PYTHONIOENCODING = 'utf-8'
     cmd /c "python scripts\coletar.py >> `"$log`" 2>&1"
