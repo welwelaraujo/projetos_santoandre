@@ -367,3 +367,14 @@ input[type="date"]:disabled { opacity: 0.4; }
 .modal__cta { width: 100%; justify-content: center; margin-top: 22px; }
 .modal__depois { display: block; margin: 14px auto 0; background: none; border: 0; color: var(--text-muted); font-family: var(--font); font-size: 13px; text-decoration: underline; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) { .modal[open] { animation: none; } }
+
+/* ---------- Quem sou eu (Sobre) ---------- */
+.autor { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 28px; align-items: start; margin: 36px 0 8px; padding: 28px; background: var(--bg-2); border: 1px solid var(--border); border-left: 4px solid var(--yellow); border-radius: var(--radius); scroll-margin-top: calc(var(--nav-h) + 16px); }
+.autor__foto { width: 160px; height: 160px; border-radius: 50%; object-fit: cover; border: 3px solid var(--yellow); }
+.doc__corpo .autor__selo { font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--yellow); }
+.doc__corpo .autor__nome { margin: 4px 0 10px; padding: 0; border: 0; font-size: 22px; }
+.autor__redes-titulo { margin-top: 14px; }
+.autor__redes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.doc__corpo .autor__redes a { padding: 7px 14px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text); text-decoration: none; border: 1px solid rgba(255,255,255,0.25); border-radius: 999px; }
+.doc__corpo .autor__redes a:hover { border-color: var(--yellow); color: var(--yellow); }
+@media (max-width: 640px) { .autor { grid-template-columns: 1fr; justify-items: center; text-align: center; padding: 24px 18px; } .autor__redes { justify-content: center; } }

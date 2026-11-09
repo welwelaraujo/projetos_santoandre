@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="estilo.css?v=18" />
+  <link rel="stylesheet" href="estilo.css?v=19" />
 </head>
 <body>
 
@@ -35,6 +35,7 @@
       <aside class="doc__indice">
         <p>Nesta página</p>
         <ol>
+          <li><a href="#quem-sou">Quem sou eu</a></li>
           <li><a href="#fonte">De onde vêm os dados</a></li>
           <li><a href="#rotina">A coleta diária</a></li>
           <li><a href="#tipos">O que entra</a></li>
@@ -46,6 +47,23 @@
         <h1>Sobre o <em>projeto</em></h1>
         <p>Este site acompanha, todo dia, o que é protocolado na <strong>Câmara Municipal de Santo André</strong>. A ideia é simples: a Câmara já publica tudo, mas em um sistema difícil de ler. Aqui, as mesmas informações aparecem organizadas por dia, por vereador e por tema.</p>
         <p>O site é independente e não tem vínculo com a Câmara, com partidos ou com mandatos.</p>
+
+        <section class="autor" id="quem-sou">
+          <img class="autor__foto" src="img/wellington.jpg" alt="Foto de Wellington Araujo Nogueira" width="160" height="160" loading="lazy" />
+          <div>
+            <p class="autor__selo">Quem sou eu</p>
+            <h2 class="autor__nome">Wellington Araujo Nogueira</h2>
+            <p>Sou <strong>cientista de dados há mais de 10 anos</strong> e apaixonado por política. Cansei de político que não faz nada, e foi por isso que criei este site: para <strong>expor o trabalho, ou a falta dele, de cada um</strong>, com os dados oficiais da própria Câmara.</p>
+            <p class="autor__redes-titulo">Me acompanhe: <strong>@wellaraujosp</strong></p>
+            <div class="autor__redes">
+              <a href="https://www.instagram.com/wellaraujosp/" target="_blank" rel="noopener">Instagram</a>
+              <a href="https://www.tiktok.com/@wellaraujosp" target="_blank" rel="noopener">TikTok</a>
+              <a href="https://www.youtube.com/@wellaraujosp" target="_blank" rel="noopener">YouTube</a>
+              <a href="https://x.com/wellaraujosp" target="_blank" rel="noopener">X</a>
+              <a href="https://www.facebook.com/wellaraujosp" target="_blank" rel="noopener">Facebook</a>
+            </div>
+          </div>
+        </section>
 
         <h2 id="fonte"><span>01</span>De onde vêm os dados</h2>
         <p>Tudo vem do portal público <a href="https://camarasempapel.cmsandre.sp.gov.br/" target="_blank" rel="noopener">Câmara sem Papel</a>, da própria Câmara, na consulta de produção legislativa por tipo e ano. De cada proposição guardamos número, ementa, autores, data de protocolo, situação e fase atual. Cada cartão tem o link para o processo original, onde estão o texto integral, os pareceres e a tramitação completa.</p>
