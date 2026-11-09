@@ -349,3 +349,17 @@ input[type="date"]:disabled { opacity: 0.4; }
 .cad__contador strong { font-size: 28px; font-weight: 900; color: var(--yellow); margin-right: 6px; }
 @media (max-width: 920px) { .cad__grid { grid-template-columns: minmax(0, 1fr); gap: 32px; } }
 @media (max-width: 640px) { .cad { padding-top: calc(var(--nav-h) + 36px); } .form { padding: 22px 18px; } }
+
+/* ---------- Modal do abaixo-assinado (página inicial) ---------- */
+.modal { margin: auto; width: min(520px, calc(100% - 32px)); padding: 36px 32px 28px; background: var(--bg-2); color: var(--text); border: 1px solid var(--border); border-top: 4px solid var(--yellow); border-radius: var(--radius); box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+.modal::backdrop { background: rgba(0,0,0,0.75); backdrop-filter: blur(3px); }
+.modal[open] { animation: modal-entra 0.3s ease-out; }
+@keyframes modal-entra { from { opacity: 0; transform: translateY(16px); } }
+.modal__fechar { position: absolute; top: 10px; right: 14px; background: none; border: 0; color: var(--text-muted); font-size: 28px; line-height: 1; cursor: pointer; }
+.modal__fechar:hover { color: var(--text); }
+.modal__titulo { font-size: clamp(22px, 4.5vw, 28px); font-weight: 900; line-height: 1.12; text-transform: uppercase; letter-spacing: -0.02em; }
+.modal__titulo em { font-style: italic; color: var(--yellow); }
+.modal__texto { margin-top: 14px; font-size: 15px; color: var(--text-2); }
+.modal__cta { width: 100%; justify-content: center; margin-top: 22px; }
+.modal__depois { display: block; margin: 14px auto 0; background: none; border: 0; color: var(--text-muted); font-family: var(--font); font-size: 13px; text-decoration: underline; cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { .modal[open] { animation: none; } }
