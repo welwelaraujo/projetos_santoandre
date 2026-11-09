@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="estilo.css?v=17" />
+  <link rel="stylesheet" href="estilo.css?v=18" />
 </head>
 <body>
 
@@ -60,7 +60,6 @@
       </div>
 
       <div class="cad__caixa">
-        <p class="cad__contador" data-total-assinaturas hidden><strong></strong> <span>pessoas já assinaram</span></p>
         <form class="form" id="form-abaixo" novalidate>
           <div class="form__group">
             <label for="f-nome">Nome completo</label>
@@ -158,7 +157,7 @@
     <p class="footer__credito container">Desenvolvido por: <strong>Wellington Araujo Nogueira</strong> · <a href="mailto:wellingtonaraujonogueira@outlook.com">wellingtonaraujonogueira@outlook.com</a> · LinkedIn: <a href="https://www.linkedin.com/in/wellingtonaraujonogueira/" target="_blank" rel="noopener">linkedin.com/in/wellingtonaraujonogueira</a></p>
   </footer>
 
-  <script src="cadastro.js?v=3"></script>
+  <script src="cadastro.js?v=4"></script>
   <script>
   iniciarCadastro({
     form: document.getElementById('form-abaixo'),
@@ -167,10 +166,16 @@
     extras: ['complemento'],
     concluir: function () {
       try { localStorage.setItem('abaixo-assinou', '1'); } catch (e) {}
-      this.form.innerHTML = '<p class="cad__selo">Assinatura registrada</p><p class="cad__ok">Obrigado por assinar! Compartilhe com quem também quer saber como o dinheiro da cidade é gasto.</p><a href="./" class="btn btn--outline">Voltar ao site</a>';
+      this.form.innerHTML =
+        '<p class="cad__selo">Assinatura registrada</p>' +
+        '<p class="cad__ok">Obrigado por assinar! Sua assinatura faz diferença na luta por uma Santo André mais transparente.</p>' +
+        '<div class="grupo">' +
+          '<p class="grupo__titulo">Entre no grupo <strong>Fiscais de Santo André</strong></p>' +
+          '<p class="grupo__texto">Receba no WhatsApp as novidades do abaixo-assinado e ajude a fiscalizar a Câmara e a Prefeitura.</p>' +
+          '<a href="https://chat.whatsapp.com/DpM3K2Pi8SiBPxLWZYJ19i" class="btn btn--whats" target="_blank" rel="noopener">Entrar no grupo do WhatsApp</a>' +
+        '</div>';
     },
   });
-  mostrarTotalAssinaturas();
   </script>
 </body>
 </html>

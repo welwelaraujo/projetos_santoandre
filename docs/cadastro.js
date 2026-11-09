@@ -105,17 +105,3 @@ function iniciarCadastro(opcoes) {
   });
 }
 
-// Mostra o total de assinaturas em elemento[data-total-assinaturas], se houver.
-function mostrarTotalAssinaturas() {
-  var alvo = document.querySelector('[data-total-assinaturas]');
-  if (!alvo || !CADASTRO_ENDPOINT) return;
-  fetch(CADASTRO_ENDPOINT + '?total=abaixo-assinado')
-    .then(function (res) { return res.json(); })
-    .then(function (r) {
-      if (!r.ok || !r.total) return;
-      alvo.querySelector('strong').textContent = r.total.toLocaleString('pt-BR');
-      alvo.querySelector('span').textContent = r.total === 1 ? 'pessoa já assinou' : 'pessoas já assinaram';
-      alvo.hidden = false;
-    })
-    .catch(function () {});
-}

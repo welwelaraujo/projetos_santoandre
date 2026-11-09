@@ -341,12 +341,16 @@ input[type="date"]:disabled { opacity: 0.4; }
 .cad__pedidos li { counter-increment: p; display: grid; grid-template-columns: 34px 1fr; font-size: 15px; color: var(--text-2); }
 .cad__pedidos li::before { content: counter(p, decimal-leading-zero); color: var(--yellow); font-weight: 900; }
 .cad__pedidos strong { color: var(--text); }
+.grupo { margin-top: 4px; padding: 20px; background: var(--bg); border: 1px solid rgba(37,211,102,0.4); border-radius: var(--radius); }
+.grupo__titulo { font-size: 16px; font-weight: 800; }
+.grupo__titulo strong { color: #25d366; }
+.grupo__texto { margin-top: 6px; font-size: 14px; color: var(--text-muted); }
+.btn--whats { margin-top: 16px; width: 100%; justify-content: center; background: #25d366; color: #000; border-color: #25d366; }
+.btn--whats:hover { background: #1ebe5a; border-color: #1ebe5a; }
 .cad__fatos { margin-top: 14px; list-style: none; display: flex; flex-direction: column; gap: 12px; }
 .cad__fatos li { display: grid; grid-template-columns: 26px 1fr; font-size: 15px; color: var(--text-2); }
 .cad__fatos li::before { content: "✕"; color: #f44336; font-weight: 900; }
 .cad__fatos strong { color: var(--text); }
-.cad__contador { padding: 18px 28px 0; font-size: 14px; color: var(--text-muted); }
-.cad__contador strong { font-size: 28px; font-weight: 900; color: var(--yellow); margin-right: 6px; }
 @media (max-width: 920px) { .cad__grid { grid-template-columns: minmax(0, 1fr); gap: 32px; } }
 @media (max-width: 640px) { .cad { padding-top: calc(var(--nav-h) + 36px); } .form { padding: 22px 18px; } }
 
