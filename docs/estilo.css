@@ -379,9 +379,15 @@ input[type="date"]:disabled { opacity: 0.4; }
 .doc__corpo .autor__redes a:hover { border-color: var(--yellow); color: var(--yellow); }
 @media (max-width: 640px) { .autor { grid-template-columns: 1fr; justify-items: center; text-align: center; padding: 24px 18px; } .autor__redes { justify-content: center; } }
 
+/* Volta para o site principal (wellaraujo.com.br) */
+.nav__links .nav__voltar { padding-right: 22px; border-right: 1px solid rgba(255,255,255,0.15); }
+.nav__links .nav__voltar a { color: var(--text-2); }
+.nav__links .nav__voltar a:hover { color: var(--yellow); }
+@media (max-width: 640px) { .nav__links .nav__voltar { padding-right: 12px; } }
 .nav__links a { white-space: nowrap; }
 @media (max-width: 1180px) and (min-width: 641px) {
   .nav__links { gap: 14px; }
+  .nav__links .nav__voltar { padding-right: 14px; }
   .nav__links a { font-size: 11px; letter-spacing: 0.03em; }
 }
 @media (max-width: 900px) and (min-width: 641px) { .marca__texto { display: none; } }
