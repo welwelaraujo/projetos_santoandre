@@ -1,0 +1,58 @@
+{
+  "atualizado_em": "2026-11-12T12:00:00",
+  "subsidio": 24754.79,
+  "encargo_patronal": 0.20,
+  "populacao": 748919,
+  "gabinete": [
+    { "cargo": "Vereador (subsídio)", "qtd": 1, "mensal": 24754.79, "tipo": "vereador", "nota": "Resolução nº 7/2024. Mais 13º igual a um subsídio por ano." },
+    { "cargo": "Chefe de Gabinete Parlamentar", "qtd": 1, "mensal": 14936.18, "tipo": "comissionado" },
+    { "cargo": "Assessor Político de Apoio Legislativo", "qtd": 1, "mensal": 14936.18, "tipo": "comissionado" },
+    { "cargo": "Assessor de Relações Parlamentares e de Políticas Públicas", "qtd": 3, "mensal": 11736.61, "tipo": "comissionado" },
+    { "cargo": "Assessor Político e de Relações Comunitárias", "qtd": 3, "mensal": 6813.83, "tipo": "comissionado" },
+    { "cargo": "Apoio Técnico Legislativo – Gabinete (servidor de carreira com função gratificada)", "qtd": 1, "mensal": 7776.32, "tipo": "fg", "nota": "Valor da tabela para a função. Não está claro se é o salário inteiro ou só a gratificação." }
+  ],
+  "camara": {
+    "2025": {
+      "rotulo": "2025 (ano fechado)",
+      "meses": 12,
+      "empenhado": 106864000.00,
+      "liquidado": 102570160.84,
+      "itens": [
+        { "grupo": "Salários (vereadores, comissionados e servidores)", "valor": 59812645.83 },
+        { "grupo": "Encargos e previdência", "valor": 22796124.44, "detalhe": "INSS patronal R$ 8,40 mi; contribuição ao IPSA R$ 3,55 mi; aporte para o déficit da previdência própria R$ 7,35 mi; aposentadorias e pensões R$ 1,17 mi; serviços pagos ao próprio município R$ 2,33 mi (intraorçamentário)" },
+        { "grupo": "Serviços de terceiros (TV Câmara, manutenção, limpeza, segurança, Correios, Escola do Legislativo…)", "valor": 16137342.20 },
+        { "grupo": "Tecnologia da informação", "valor": 3239567.77 },
+        { "grupo": "Rescisões e verbas trabalhistas", "valor": 1714306.22 },
+        { "grupo": "Auxílio-alimentação dos servidores", "valor": 1914106.40 },
+        { "grupo": "Outras despesas de pessoal e benefícios (horas extras, auxílio-transporte, benefícios assistenciais)", "valor": 891349.00 },
+        { "grupo": "Material de consumo", "valor": 297349.57 },
+        { "grupo": "Obras, sentenças judiciais e outros", "valor": 61208.57 }
+      ]
+    },
+    "2026": {
+      "rotulo": "2026 (janeiro a setembro)",
+      "meses": 9,
+      "empenhado": 89924770.76,
+      "liquidado": 81140456.48,
+      "orcado": 124186000.00
+    }
+  },
+  "contratos": [
+    { "objeto": "Operação da TV Câmara e sistema de gestão legislativa (IPCOM)", "valor": 25840000.00, "ano": 2025, "nota": "Contrato 12/2025, valor global de vários anos" },
+    { "objeto": "Publicidade institucional (CIN Comunicação)", "valor": 3000000.00, "ano": 2026, "nota": "Contrato 15/2026, valor estimativo" },
+    { "objeto": "Sistema integrado de gestão, contratação emergencial (Ápice)", "valor": 1346000.00, "ano": 2026, "nota": "Contrato 16/2026" },
+    { "objeto": "Pacote de serviços dos Correios", "valor": 1053159.84, "ano": 2025, "nota": "Contrato 13/2025. Não há divisão por gabinete publicada" },
+    { "objeto": "Máquinas de café e bebidas quentes", "valor": 565943.76, "ano": 2026, "nota": "Contrato 10/2026" },
+    { "objeto": "Plataforma de academias e bem-estar para servidores (GPBR)", "valor": 145314.00, "ano": 2026, "nota": "Contrato 09/2026" },
+    { "objeto": "Telefonia fixa (Algar)", "valor": 33600.00, "ano": 2025, "nota": "Contrato 10/2025" },
+    { "objeto": "Seguro de vida em grupo para servidores, comissionados e vereadores", "valor": 25174.00, "ano": 2025, "nota": "Contrato 07/2025" },
+    { "objeto": "Seguro dos veículos oficiais da Câmara", "valor": 3302.02, "ano": 2025, "nota": "Contrato 04/2025" }
+  ],
+  "fontes": [
+    { "nome": "Resolução nº 7/2024 (subsídio e 13º dos vereadores)", "url": "https://camarasempapel.cmsandre.sp.gov.br/spl/processo.aspx?id=57717" },
+    { "nome": "Tabela de cargos e salários da Câmara (2025)", "url": "https://www.cmsandre.sp.gov.br/wp-content/uploads/2025/06/2025_CARGOS-E-SALARIOS-CMSA.pdf" },
+    { "nome": "Lei de reestruturação dos cargos de gabinete (quantidade por gabinete, vigente desde 2/1/2025)", "url": "https://santoandre.splonline.com.br/Arquivo/Documents/PL/57772-202411261328238772076030PQ(829).pdf" },
+    { "nome": "Balancetes da despesa da Câmara (dezembro/2025 e setembro/2026)", "url": "http://www6.cmsandre.sp.gov.br:9002/documentos-contabeis/?idTipo=20" },
+    { "nome": "Contratos da Câmara (2025 e 2026)", "url": "https://www.cmsandre.sp.gov.br/portal-da-transparencia/contratos/" }
+  ]
+}
