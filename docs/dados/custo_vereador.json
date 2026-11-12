@@ -9,7 +9,8 @@
     { "cargo": "Assessor Político de Apoio Legislativo", "qtd": 1, "mensal": 14936.18, "tipo": "comissionado" },
     { "cargo": "Assessor de Relações Parlamentares e de Políticas Públicas", "qtd": 3, "mensal": 11736.61, "tipo": "comissionado" },
     { "cargo": "Assessor Político e de Relações Comunitárias", "qtd": 3, "mensal": 6813.83, "tipo": "comissionado" },
-    { "cargo": "Apoio Técnico Legislativo – Gabinete (servidor de carreira com função gratificada)", "qtd": 1, "mensal": 7776.32, "tipo": "fg", "nota": "Valor da tabela para a função. Não está claro se é o salário inteiro ou só a gratificação." }
+    { "cargo": "Apoio Técnico Legislativo – Gabinete (servidor de carreira com função gratificada)", "qtd": 1, "mensal": 7776.32, "tipo": "fg", "nota": "Valor da tabela para a função. Não está claro se é o salário inteiro ou só a gratificação." },
+    { "cargo": "Carro alugado (sedã, sem motorista)", "qtd": 1, "mensal": 5588.96, "tipo": "carro", "nota": "Contrato 15/2023: R$ 5.316,24 por carro em 2024, reajustado em 5,13% em 2025. Combustível pago à parte, sem divisão por gabinete." }
   ],
   "camara": {
     "2025": {
@@ -39,6 +40,7 @@
   },
   "contratos": [
     { "objeto": "Operação da TV Câmara e sistema de gestão legislativa (IPCOM)", "valor": 25840000.00, "ano": 2025, "nota": "Contrato 12/2025, valor global de vários anos" },
+    { "objeto": "Aluguel de carros para os gabinetes e a Presidência (Primeira Novação Locadora): R$ 178.817,60 por mês", "valor": 5364528.00, "ano": 2026, "nota": "Contrato 15/2023, prorrogado de março/2026 a setembro/2028. Em 2025 ganhou 6 carros “para o atendimento dos novos Parlamentares”" },
     { "objeto": "Publicidade institucional (CIN Comunicação)", "valor": 3000000.00, "ano": 2026, "nota": "Contrato 15/2026, valor estimativo" },
     { "objeto": "Sistema integrado de gestão, contratação emergencial (Ápice)", "valor": 1346000.00, "ano": 2026, "nota": "Contrato 16/2026" },
     { "objeto": "Pacote de serviços dos Correios", "valor": 1053159.84, "ano": 2025, "nota": "Contrato 13/2025. Não há divisão por gabinete publicada" },
@@ -53,6 +55,7 @@
     { "nome": "Tabela de cargos e salários da Câmara (2025)", "url": "https://www.cmsandre.sp.gov.br/wp-content/uploads/2025/06/2025_CARGOS-E-SALARIOS-CMSA.pdf" },
     { "nome": "Lei de reestruturação dos cargos de gabinete (quantidade por gabinete, vigente desde 2/1/2025)", "url": "https://santoandre.splonline.com.br/Arquivo/Documents/PL/57772-202411261328238772076030PQ(829).pdf" },
     { "nome": "Balancetes da despesa da Câmara (dezembro/2025 e setembro/2026)", "url": "http://www6.cmsandre.sp.gov.br:9002/documentos-contabeis/?idTipo=20" },
-    { "nome": "Contratos da Câmara (2025 e 2026)", "url": "https://www.cmsandre.sp.gov.br/portal-da-transparencia/contratos/" }
+    { "nome": "Contratos da Câmara (2025 e 2026)", "url": "https://www.cmsandre.sp.gov.br/portal-da-transparencia/contratos/" },
+    { "nome": "Contrato 15/2023 de locação de veículos e aditivos (contratos na íntegra, 2023)", "url": "http://www6.cmsandre.sp.gov.br:9002/licitacoes/contratos/?ano=2023" }
   ]
 }

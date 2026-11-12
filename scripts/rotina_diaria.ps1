@@ -16,6 +16,9 @@ try {
     $env:PYTHONIOENCODING = 'utf-8'
     cmd /c "python scripts\coletar.py >> `"$log`" 2>&1"
     if ($LASTEXITCODE -ne 0) { throw "coletar.py terminou com código $LASTEXITCODE" }
+    # Indicações e respostas da Prefeitura: se falhar, mantém o arquivo anterior e segue com o resto.
+    cmd /c "python scripts\indicacoes.py >> `"$log`" 2>&1"
+    if ($LASTEXITCODE -ne 0) { Registrar "indicacoes.py terminou com código $LASTEXITCODE; indicações não atualizadas" }
     git add docs/dados
     git diff --cached --quiet
     if ($LASTEXITCODE -ne 0) {

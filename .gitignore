@@ -4,3 +4,7 @@ scripts/rotina_diaria.log
 
 # IDs do Apps Script e da planilha de assinaturas ficam só nesta máquina (usados pelo clasp).
 apps-script/.clasp.json
+
+# Cache e logs locais da coleta de indicações (o resultado vai em docs/dados/indicacoes.json).
+scripts/cache_indicacoes.json
+scripts/indicacoes_*.log

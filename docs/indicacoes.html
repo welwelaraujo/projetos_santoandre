@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Indicações dos vereadores</title>
+  <meta name="description" content="Os pedidos dos vereadores de Santo André ao prefeito e o que a Prefeitura respondeu: atendidos, em andamento, negados ou sem resposta." />
+  <link rel="icon" href="img/wan.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="img/wan_180.png" />
+  <meta property="og:image" content="https://wellaraujo.com.br/projetos_santoandre/img/og.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="estilo.css?v=23" />
+  <style>
+    .sit--andamento { border-color: rgba(252,189,39,0.6); color: var(--yellow); }
+    .sit--aguardando { border-color: rgba(255,255,255,0.15); color: var(--text-muted); border-style: dashed; }
+    .resp { border-left: 2px solid var(--border); padding-left: 12px; font-size: 13.5px; color: var(--text-2); }
+    .resp summary { cursor: pointer; font-weight: 700; color: var(--text); font-size: 12.5px; }
+    .resp p { margin: 8px 0 6px; line-height: 1.55; }
+    .resp a { color: var(--yellow); font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; }
+    .espera { font-size: 12.5px; color: var(--text-muted); }
+    .rk--ind { grid-template-columns: 210px minmax(0, 1fr) 230px; }
+    @media (max-width: 640px) { .rk--ind { grid-template-columns: minmax(0, 1fr) 190px; } .rk--ind .rk__barra { grid-column: 1 / -1; order: 3; } }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav__inner container">
+      <a href="./" class="marca"><img class="marca__logo" src="img/wan.svg" alt="WAN" width="36" height="36" /><span class="marca__texto">Projetos <em>Santo André</em></span></a>
+      <ul class="nav__links">
+        <li class="nav__voltar"><a href="/" title="Página inicial de wellaraujo.com.br">← Início</a></li>
+        <li><a href="./">Hoje</a></li>
+        <li><a href="explorar.html">Explorar</a></li>
+        <li><a href="indicacoes.html" aria-current="page">Indicações</a></li>
+        <li><a href="vereadores.html">Vereadores</a></li>
+        <li><a href="presenca.html">Presença</a></li>
+        <li><a href="votacoes.html">Votações</a></li>
+        <li><a href="custo.html">Custo</a></li>
+        <li><a href="sobre.html">Sobre</a></li>
+        <li><a href="abaixo-assinado.html" class="nav__cta">Abaixo-assinado</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="container">
+      <p class="section-label">Pedidos ao prefeito</p>
+      <h1 class="hero__title">Indicações: <em>e aí, foi feito?</em></h1>
+      <p class="hero__lede">A indicação é o pedido do vereador ao prefeito: tapar um buraco, podar uma árvore, pôr uma lombada. Ela não é votada. A Câmara manda um ofício à Prefeitura e espera a resposta. Aqui está cada indicação desde 2025 e o que a Prefeitura respondeu.</p>
+      <div class="hero__meta"><span>Atualizado em <b data-atualizado-ind>—</b></span><span>Fonte: Câmara sem Papel e ofícios-resposta da Prefeitura</span></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="secao">
+      <div class="container">
+        <form class="filtros" id="filtros" onsubmit="return false">
+          <label class="busca">Palavra-chave<input type="search" id="q" placeholder="Ex.: buraco, poda, lombada, Vila Luzita…" autocomplete="off" /></label>
+          <label>Vereador<select id="vereador"></select></label>
+          <label>Resposta<select id="status"></select></label>
+          <label>Ano<select id="ano"></select></label>
+        </form>
+        <div class="resumo-busca">
+          <span id="contagem">Carregando…</span>
+          <span style="display:flex;gap:10px;flex-wrap:wrap">
+            <button type="button" class="btn btn--outline btn--sm" id="limpar">Limpar filtros</button>
+            <button type="button" class="btn btn--outline btn--sm" id="csv">Baixar CSV</button>
+          </span>
+        </div>
+        <div class="kpis" id="kpis"></div>
+        <div class="aviso" style="margin-top:16px">A situação vem do que a <strong>própria Prefeitura escreveu</strong> no ofício-resposta, classificado automaticamente pelas palavras do texto (“foi atendida”, “incluída na programação”, “não há previsão”…). Ninguém foi ao local conferir. Abra a resposta de cada indicação para ler o texto original.</div>
+      </div>
+    </section>
+
+    <section class="secao">
+      <div class="container">
+        <p class="section-label">Ranking</p>
+        <h2 class="secao__titulo">Indicações por vereador</h2>
+        <p class="secao__intro">Quantas indicações cada vereador fez e o que a Prefeitura respondeu. Clique num nome para ver só as dele. Respeita os filtros de ano e palavra-chave.</p>
+        <div class="cartao">
+          <div class="legenda" id="legenda"></div>
+          <div class="ranking" id="ranking"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="secao">
+      <div class="container">
+        <p class="section-label">Uma a uma</p>
+        <h2 class="secao__titulo">Lista de indicações</h2>
+        <div class="lista" id="lista"></div>
+        <div class="paginas" id="paginas"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <a href="./" class="marca"><img class="marca__logo" src="img/wan.svg" alt="WAN" width="36" height="36" /></a>
+      <nav class="footer__links">
+        <a href="/">← wellaraujo.com.br</a>
+        <a href="./">Hoje</a>
+        <a href="explorar.html">Explorar</a>
+        <a href="indicacoes.html">Indicações</a>
+        <a href="vereadores.html">Vereadores</a>
+        <a href="presenca.html">Presença</a>
+        <a href="votacoes.html">Votações</a>
+        <a href="custo.html">Custo</a>
+        <a href="sobre.html">Sobre</a>
+        <a href="abaixo-assinado.html">Abaixo-assinado</a>
+        <a href="privacidade.html">Privacidade</a>
+      </nav>
+      <p class="footer__info">Fonte: portal Câmara sem Papel, da Câmara Municipal de Santo André. Consulte sempre o texto oficial.</p>
+    </div>
+    <p class="footer__credito container">Desenvolvido por: <strong>Wellington Araujo Nogueira</strong> · <a href="mailto:wellingtonaraujonogueira@outlook.com">wellingtonaraujonogueira@outlook.com</a> · LinkedIn: <a href="https://www.linkedin.com/in/wellingtonaraujonogueira/" target="_blank" rel="noopener">linkedin.com/in/wellingtonaraujonogueira</a></p>
+  </footer>
+
+  <script src="app.js?v=3"></script>
+  <script>
+  (function () {
+    var A = window.APP, POR_PAGINA = 30, pagina = 1, filtrados = [];
+    var PORTAL = 'https://camarasempapel.cmsandre.sp.gov.br/spl/processo.aspx?tipo=153&id=';
+    // Ordem das cores na barra e na legenda.
+    var ST = [
+      { c: 'atendida', nome: 'Atendida', longo: 'Atendida, segundo a Prefeitura', cor: '#3ccf98', cls: 'ok' },
+      { c: 'andamento', nome: 'Em andamento', longo: 'Programada ou em andamento', cor: 'var(--yellow)', cls: 'andamento' },
+      { c: 'respondida', nome: 'Respondida', longo: 'Respondida (ler a resposta)', cor: '#9a9a9a', cls: 'neutro' },
+      { c: 'negada', nome: 'Não atendida', longo: 'Não atendida ou sem previsão', cor: '#f08a8a', cls: 'nao' },
+      { c: 'aguardando', nome: 'Sem resposta', longo: 'Sem resposta até hoje', cor: '#3a3a3a', cls: 'aguardando' },
+      { c: 'arquivada', nome: 'Arquivada sem resposta', longo: 'Arquivada sem resposta', cor: '#5a5a5a', cls: 'neutro' }
+    ];
+    var STI = {}; ST.forEach(function (s) { STI[s.c] = s; });
+    var campos = ['q', 'vereador', 'status', 'ano'], el = {};
+    campos.forEach(function (c) { el[c] = document.getElementById(c); });
+
+    function opcoes(sel, todos, vals) {
+      sel.innerHTML = '<option value="">' + todos + '</option>' + vals.map(function (v) { return '<option value="' + A.esc(v[0]) + '">' + A.esc(v[1]) + '</option>'; }).join('');
+    }
+    function limpaNome(n) { return n.replace(/^Ver\.\s*/i, ''); }
+
+    fetch('dados/indicacoes.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (D) {
+      document.querySelectorAll('[data-atualizado-ind]').forEach(function (e) { e.textContent = A.dataHora(D.atualizado_em); });
+      var I = D.indicacoes;
+      I.forEach(function (p) {
+        p.nomes = p.au.map(function (id) { return limpaNome(D.autores[id] || ''); }).filter(Boolean);
+        p._txt = A.semAcento(p.e + ' ' + p.nomes.join(' ') + ' ' + p.n + '/' + p.a + ' ' + p.t);
+      });
+      var cont = {}; I.forEach(function (p) { p.nomes.forEach(function (n) { cont[n] = (cont[n] || 0) + 1; }); });
+      opcoes(el.vereador, 'Todos', Object.keys(cont).sort(function (a, b) { return a.replace(/^(Dr|Dra)\.\s*/, '').localeCompare(b.replace(/^(Dr|Dra)\.\s*/, '')); }).map(function (n) { return [n, n + ' (' + A.int(cont[n]) + ')']; }));
+      var porSt = {}; I.forEach(function (p) { porSt[p.s] = (porSt[p.s] || 0) + 1; });
+      opcoes(el.status, 'Todas', ST.filter(function (s) { return porSt[s.c]; }).map(function (s) { return [s.c, s.longo + ' (' + A.int(porSt[s.c]) + ')']; }));
+      opcoes(el.ano, 'Todos', Object.keys(I.reduce(function (o, p) { o[p.a] = 1; return o; }, {})).sort().reverse().map(function (a) { return [a, a]; }));
+      document.getElementById('legenda').innerHTML = ST.map(function (s) { return '<span><i style="background:' + s.cor + '"></i>' + s.nome + '</span>'; }).join('');
+
+      var url = new URLSearchParams(location.search);
+      campos.forEach(function (c) { if (url.get(c)) el[c].value = url.get(c); });
+
+      function aplicar() {
+        var f = {}; campos.forEach(function (c) { f[c] = el[c].value; });
+        var termos = A.semAcento(f.q).split(/\s+/).filter(Boolean);
+        var base = I.filter(function (p) {
+          if (f.ano && String(p.a) !== f.ano) return false;
+          return termos.every(function (t) { return p._txt.indexOf(t) >= 0; });
+        });
+        filtrados = base.filter(function (p) {
+          if (f.vereador && p.nomes.indexOf(f.vereador) < 0) return false;
+          return !f.status || p.s === f.status;
+        });
+        var u = new URLSearchParams(); campos.forEach(function (c) { if (f[c]) u.set(c, f[c]); });
+        history.replaceState(null, '', location.pathname + (u.toString() ? '?' + u : ''));
+        kpis(base.filter(function (p) { return !f.vereador || p.nomes.indexOf(f.vereador) >= 0; }));
+        ranking(base, f.vereador);
+        pagina = 1; desenhar();
+      }
+
+      function kpis(L) {
+        var n = {}; L.forEach(function (p) { n[p.s] = (n[p.s] || 0) + 1; });
+        var resp = L.length - (n.aguardando || 0) - (n.arquivada || 0);
+        var esperas = L.filter(function (p) { return p.r && p.d; }).map(function (p) { return (new Date(p.r) - new Date(p.d)) / 864e5; }).sort(function (a, b) { return a - b; });
+        var med = esperas.length ? Math.round(esperas[Math.floor(esperas.length / 2)]) : null;
+        var antigas = L.filter(function (p) { return p.s === 'aguardando' && p.dias > 180; }).length;
+        function pc(x) { return L.length ? (100 * x / L.length).toFixed(0) + '%' : '—'; }
+        document.getElementById('kpis').innerHTML = [
+          ['Indicações', A.int(L.length), 'pedidos ao prefeito', 'var(--yellow)'],
+          ['Respondidas', pc(resp), A.int(resp) + ' com ofício-resposta', '#9a9a9a'],
+          ['Atendidas', pc(n.atendida || 0), A.int(n.atendida || 0) + ' segundo a Prefeitura', '#3ccf98'],
+          ['Sem resposta', pc(n.aguardando || 0), A.int(antigas) + ' esperam há mais de 6 meses', '#5a5a5a'],
+          ['Tempo de resposta', med == null ? '—' : med + ' dias', 'mediana, do protocolo à resposta', 'var(--yellow)']
+        ].map(function (k) {
+          return '<div class="kpi" style="--kpi-cor:' + k[3] + '"><p class="kpi__rotulo">' + k[0] + '</p><p class="kpi__valor">' + k[1] + '</p><p class="kpi__sub">' + k[2] + '</p></div>';
+        }).join('');
+      }
+
+      function ranking(L, ver) {
+        var R = {};
+        L.forEach(function (p) {
+          p.nomes.forEach(function (n) {
+            var r = R[n] = R[n] || { nome: n, total: 0 };
+            r.total++; r[p.s] = (r[p.s] || 0) + 1;
+          });
+        });
+        var lista = Object.keys(R).map(function (k) { return R[k]; }).sort(function (a, b) { return b.total - a.total; });
+        document.getElementById('ranking').innerHTML = lista.map(function (r) {
+          var segs = ST.map(function (s) {
+            var x = r[s.c] || 0; if (!x) return '';
+            return '<i style="flex:' + x + ';background:' + s.cor + '" data-dica="<b>' + A.esc(r.nome) + '</b><br>' + s.nome + ': ' + A.int(x) + '"></i>';
+          }).join('');
+          var at = r.atendida || 0;
+          var u = new URLSearchParams(location.search); u.set('vereador', r.nome);
+          return '<a class="rk rk--ind' + (ver && ver !== r.nome ? ' rk--apagado' : '') + '" href="?' + u + '">' +
+            '<span class="rk__nome">' + A.esc(r.nome) + '</span><span class="rk__barra">' + segs + '</span>' +
+            '<span class="rk__total">' + A.int(r.total) + '<small>' + (100 * at / r.total).toFixed(0) + '% atendidas · ' + (100 * (r.aguardando || 0) / r.total).toFixed(0) + '% sem resposta</small></span></a>';
+        }).join('') || '<p class="vazio">Nenhuma indicação com esses filtros.</p>';
+      }
+
+      function cartao(p) {
+        var s = STI[p.s];
+        var resp = '';
+        if (p.t) {
+          resp = '<details class="resp"><summary>O que a Prefeitura respondeu' + (p.r ? ' em ' + A.data(p.r) : '') + '</summary><p>' + A.esc(p.t) + '</p>' +
+            (p.o ? '<a href="' + A.esc(p.o) + '" target="_blank" rel="noopener">Ofício-resposta (PDF) ↗</a>' : '') + '</details>';
+        } else if (p.s === 'respondida') {
+          resp = '<p class="espera">Respondida' + (p.r ? ' em ' + A.data(p.r) : '') + '. O trecho não foi localizado automaticamente no ofício. ' +
+            (p.o ? '<a href="' + A.esc(p.o) + '" target="_blank" rel="noopener" style="color:var(--yellow)">Ler o ofício ↗</a>' : '') + '</p>';
+        } else if (p.s === 'aguardando' && p.dias != null) {
+          resp = '<p class="espera">Protocolada há ' + A.int(p.dias) + ' dia' + (p.dias === 1 ? '' : 's') + ', sem resposta registrada.</p>';
+        }
+        return '<article class="prop" style="--cor:' + s.cor + '">' +
+          '<div class="prop__topo"><span class="prop__tipo"><i></i>Indicação</span><span class="prop__num">nº ' + p.n + '/' + p.a + '</span>' +
+          '<span>' + A.data(p.d) + '</span><span class="sit sit--' + s.cls + '">' + s.nome + '</span></div>' +
+          '<p class="prop__ementa">' + A.esc(A.frase(p.e.toUpperCase(), p.nomes)) + '</p>' + resp +
+          '<div class="prop__pe"><span class="prop__autor">' + p.nomes.map(function (n) { return '<a href="?vereador=' + encodeURIComponent(n) + '">Ver. ' + A.esc(n) + '</a>'; }).join(', ') + '</span>' +
+          '<a class="prop__link" href="' + PORTAL + p.id + '&ano_proposicao=' + p.a + '" target="_blank" rel="noopener">Ver na Câmara ↗</a></div></article>';
+      }
+
+      function desenhar() {
+        var total = Math.max(1, Math.ceil(filtrados.length / POR_PAGINA));
+        pagina = Math.min(pagina, total);
+        document.getElementById('contagem').innerHTML = '<strong>' + A.int(filtrados.length) + '</strong> ' + (filtrados.length === 1 ? 'indicação encontrada' : 'indicações encontradas');
+        var fatia = filtrados.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
+        document.getElementById('lista').innerHTML = fatia.length ? fatia.map(cartao).join('') : '<p class="vazio">Nenhuma indicação com esses filtros.</p>';
+        document.getElementById('paginas').innerHTML = total > 1
+          ? '<button type="button" class="btn btn--outline btn--sm" data-p="' + (pagina - 1) + '"' + (pagina === 1 ? ' disabled' : '') + '>← Anterior</button>' +
+            '<span>Página ' + pagina + ' de ' + total + '</span>' +
+            '<button type="button" class="btn btn--outline btn--sm" data-p="' + (pagina + 1) + '"' + (pagina === total ? ' disabled' : '') + '>Próxima →</button>'
+          : '';
+      }
+
+      document.getElementById('paginas').addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-p]'); if (!b || b.disabled) return;
+        pagina = +b.dataset.p; desenhar();
+        document.getElementById('lista').scrollIntoView({ behavior: 'smooth' });
+      });
+      var espera;
+      el.q.addEventListener('input', function () { clearTimeout(espera); espera = setTimeout(aplicar, 200); });
+      campos.slice(1).forEach(function (c) { el[c].addEventListener('change', aplicar); });
+      document.getElementById('limpar').addEventListener('click', function () { campos.forEach(function (c) { el[c].value = ''; }); aplicar(); });
+      document.getElementById('csv').addEventListener('click', function () {
+        var col = ['numero', 'ano', 'data', 'vereador', 'pedido', 'situacao', 'data_resposta', 'resposta', 'oficio', 'link'];
+        var linhas = [col.join(';')].concat(filtrados.map(function (p) {
+          return [p.n, p.a, p.d, p.nomes.join(', '), p.e, STI[p.s].longo, p.r, p.t, p.o, PORTAL + p.id + '&ano_proposicao=' + p.a]
+            .map(function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }).join(';');
+        }));
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob(['﻿' + linhas.join('\n')], { type: 'text/csv;charset=utf-8' }));
+        a.download = 'indicacoes_santo_andre.csv'; a.click();
+      });
+      aplicar();
+    });
+  })();
+  </script>
+</body>
+</html>

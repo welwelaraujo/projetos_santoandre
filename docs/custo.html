@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quanto custa um vereador</title>
+  <meta name="description" content="Quanto custa por mês um vereador de Santo André: subsídio, 13º, assessores, encargos e a fatia de cada um no orçamento da Câmara. Com o custo de cada presença e de cada proposta." />
+  <link rel="icon" href="img/wan.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="img/wan_180.png" />
+  <meta property="og:image" content="https://wellaraujo.com.br/projetos_santoandre/img/og.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="estilo.css?v=23" />
+  <style>
+    .tab-gab td, .tab-gab th { font-variant-numeric: tabular-nums; }
+    .tab-gab td:nth-child(n+2), .tab-gab th:nth-child(n+2) { text-align: right; white-space: nowrap; }
+    .tab-gab tfoot td { font-weight: 900; color: var(--yellow); border-top: 2px solid var(--yellow); }
+    .tab-gab small { display: block; color: var(--text-muted); font-size: 11.5px; font-weight: 600; }
+    .barras { display: flex; flex-direction: column; gap: 12px; }
+    .barra__topo { display: flex; justify-content: space-between; gap: 12px; font-size: 13.5px; font-weight: 700; }
+    .barra__topo b { white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .barra__trilho { height: 14px; background: var(--bg-3, #222); border-radius: 4px; overflow: hidden; margin-top: 6px; }
+    .barra__trilho i { display: block; height: 100%; background: var(--yellow); border-radius: 4px; }
+    .barra small { display: block; color: var(--text-muted); font-size: 12px; margin-top: 4px; }
+    .abas { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .abas button[aria-pressed="true"] { background: var(--yellow); color: #000; border-color: var(--yellow); }
+    .rk--custo { grid-template-columns: 210px minmax(0, 1fr) 200px; }
+    .rk--custo .rk__barra i { background: var(--yellow); border-radius: 4px; }
+    .rk--suplente .rk__nome::after { content: " (suplente)"; color: var(--text-muted); font-weight: 600; }
+    @media (max-width: 640px) { .rk--custo { grid-template-columns: minmax(0, 1fr) 150px; } .rk--custo .rk__barra { grid-column: 1 / -1; order: 3; } }
+    .contratos li { margin: 8px 0; }
+    .contratos b { font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav__inner container">
+      <a href="./" class="marca"><img class="marca__logo" src="img/wan.svg" alt="WAN" width="36" height="36" /><span class="marca__texto">Projetos <em>Santo André</em></span></a>
+      <ul class="nav__links">
+        <li class="nav__voltar"><a href="/" title="Página inicial de wellaraujo.com.br">← Início</a></li>
+        <li><a href="./">Hoje</a></li>
+        <li><a href="explorar.html">Explorar</a></li>
+        <li><a href="indicacoes.html">Indicações</a></li>
+        <li><a href="vereadores.html">Vereadores</a></li>
+        <li><a href="presenca.html">Presença</a></li>
+        <li><a href="votacoes.html">Votações</a></li>
+        <li><a href="custo.html" aria-current="page">Custo</a></li>
+        <li><a href="sobre.html">Sobre</a></li>
+        <li><a href="abaixo-assinado.html" class="nav__cta">Abaixo-assinado</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="container">
+      <p class="section-label">Dinheiro público</p>
+      <h1 class="hero__title">Quanto custa <em>um vereador</em></h1>
+      <p class="hero__lede">O salário é só o começo. Cada vereador de Santo André tem direito a 13º, a oito assessores de livre nomeação e a um carro alugado, e a Câmara inteira custa mais de R$ 100 milhões por ano. Aqui está a conta, item por item, com a fonte de cada número.</p>
+      <div class="hero__meta"><span>Fonte: Resolução nº 7/2024, tabela de salários e balancetes da Câmara</span></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="secao">
+      <div class="container">
+        <div class="kpis" id="kpis"></div>
+      </div>
+    </section>
+
+    <section class="secao">
+      <div class="container">
+        <p class="section-label">O gabinete</p>
+        <h2 class="secao__titulo">Um vereador e sua equipe, por mês</h2>
+        <p class="secao__intro">Cada gabinete pode ter 8 assessores em comissão, escolhidos pelo vereador, e 1 servidor de carreira, além de um carro alugado. A quantidade de cargos está na lei de cargos da Câmara, vigente desde janeiro de 2025. Os salários vêm da tabela oficial da Câmara. É o custo do gabinete completo: se o vereador nomear menos gente, gasta menos.</p>
+        <div class="tabela-wrap"><table class="tab-gab" id="gabinete"></table></div>
+        <p class="kpi__sub" style="margin-top:10px">“Custo médio mensal” espalha pelo ano o 13º (vereador e assessores), o terço de férias (assessores) e a contribuição patronal ao INSS (20%, sem contar o seguro de acidente de trabalho). O vereador não tem adicional de férias. O carro é um sedã alugado pela Câmara: em 2025 o contrato ganhou 6 carros a mais “para possibilitar o atendimento dos novos Parlamentares”, um para cada cadeira criada. O combustível e benefícios como o auxílio-alimentação ficam de fora, porque a Câmara não informa quanto cabe a cada gabinete.</p>
+      </div>
+    </section>
+
+    <section class="secao">
+      <div class="container">
+        <p class="section-label">A Câmara inteira</p>
+        <h2 class="secao__titulo">Para onde foi o dinheiro em 2025</h2>
+        <p class="secao__intro">Tudo o que a Câmara empenhou no ano, agrupado por tipo de despesa. Inclui servidores de carreira, a TV Câmara, a previdência e a manutenção do prédio. Dividindo pelos 27 vereadores, dá o custo de cada cadeira para a cidade.</p>
+        <div class="cartao"><div class="barras" id="barras"></div></div>
+        <p class="kpi__sub" id="nota2026" style="margin-top:10px"></p>
+      </div>
+    </section>
+
+    <section class="secao">
+      <div class="container">
+        <p class="section-label">Contratos</p>
+        <h2 class="secao__titulo">Contratos da Câmara que chamam atenção</h2>
+        <p class="secao__intro">Alguns contratos de 2025 e 2026 publicados pela Câmara. Valem para a Casa toda, não para um vereador específico.</p>
+        <div class="cartao"><ul class="contratos" id="contratos"></ul></div>
+      </div>
+    </section>
+
+    <section class="secao">
+      <div class="container">
+        <p class="section-label">Por vereador</p>
+        <h2 class="secao__titulo">Quanto custa cada presença e cada proposta</h2>
+        <div class="aviso" style="margin-bottom:16px">A Câmara <strong>não publica quanto cada gabinete gasta</strong>: não diz quantos assessores cada vereador nomeou, nem quanto cada um usa de Correios ou telefone. Por isso, este ranking parte do custo do gabinete completo, igual para todos (proporcional ao tempo de mandato de cada um), e divide pelo que cada vereador entregou. O custo é o mesmo; o que muda é a entrega.</div>
+        <div class="abas" id="abas">
+          <button type="button" class="btn btn--outline btn--sm" data-m="presenca" aria-pressed="true">Por sessão em que esteve presente</button>
+          <button type="button" class="btn btn--outline btn--sm" data-m="prop" aria-pressed="false">Por proposição apresentada</button>
+          <button type="button" class="btn btn--outline btn--sm" data-m="tudo" aria-pressed="false">Por proposição ou indicação</button>
+        </div>
+        <p class="secao__intro" id="explica"></p>
+        <div class="cartao"><div class="ranking" id="ranking"><p class="vazio">Carregando…</p></div></div>
+      </div>
+    </section>
+
+    <section class="secao">
+      <div class="container">
+        <p class="section-label">Fontes</p>
+        <h2 class="secao__titulo">De onde vêm os números</h2>
+        <ul id="fontes"></ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <a href="./" class="marca"><img class="marca__logo" src="img/wan.svg" alt="WAN" width="36" height="36" /></a>
+      <nav class="footer__links">
+        <a href="/">← wellaraujo.com.br</a>
+        <a href="./">Hoje</a>
+        <a href="explorar.html">Explorar</a>
+        <a href="indicacoes.html">Indicações</a>
+        <a href="vereadores.html">Vereadores</a>
+        <a href="presenca.html">Presença</a>
+        <a href="votacoes.html">Votações</a>
+        <a href="custo.html">Custo</a>
+        <a href="sobre.html">Sobre</a>
+        <a href="abaixo-assinado.html">Abaixo-assinado</a>
+        <a href="privacidade.html">Privacidade</a>
+      </nav>
+      <p class="footer__info">Fonte: portal Câmara sem Papel e portal da transparência da Câmara Municipal de Santo André. Consulte sempre o texto oficial.</p>
+    </div>
+    <p class="footer__credito container">Desenvolvido por: <strong>Wellington Araujo Nogueira</strong> · <a href="mailto:wellingtonaraujonogueira@outlook.com">wellingtonaraujonogueira@outlook.com</a> · LinkedIn: <a href="https://www.linkedin.com/in/wellingtonaraujonogueira/" target="_blank" rel="noopener">linkedin.com/in/wellingtonaraujonogueira</a></p>
+  </footer>
+
+  <script src="app.js?v=3"></script>
+  <script>
+  (function () {
+    var A = window.APP;
+    function brl(v, casas) { return 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: casas == null ? 2 : casas, maximumFractionDigits: casas == null ? 2 : casas }); }
+    function mil(v) { return v >= 1e6 ? 'R$ ' + (v / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 2 }) + ' mi' : 'R$ ' + Math.round(v / 1000).toLocaleString('pt-BR') + ' mil'; }
+    function chave(n) { return A.semAcento(n).replace(/^ver\.\s*/, '').replace(/[^a-z ]/g, '').trim(); }
+
+    fetch('dados/custo_vereador.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (C) {
+      var enc = 1 + C.encargo_patronal;
+      // Custo médio mensal: 13º para todos; terço de férias só para quem não é vereador; o carro não tem nenhum dos dois.
+      C.gabinete.forEach(function (g) {
+        var fator = g.tipo === 'carro' ? 1 : g.tipo === 'vereador' ? 13 / 12 * enc : (13 + 1 / 3) / 12 * enc;
+        g.total = g.qtd * g.mensal; g.medio = g.total * fator;
+      });
+      var bruto = C.gabinete.reduce(function (s, g) { return s + g.total; }, 0);
+      var medio = C.gabinete.reduce(function (s, g) { return s + g.medio; }, 0);
+      var c25 = C.camara['2025'], c26 = C.camara['2026'];
+      var porCadeira = c25.empenhado / 27 / 12;
+
+      document.getElementById('kpis').innerHTML = [
+        ['Subsídio', brl(C.subsidio), 'por mês, mais 13º · Resolução nº 7/2024', 'var(--yellow)'],
+        ['Gabinete completo', mil(medio), 'por mês, com assessores, carro, 13º, férias e INSS', 'var(--yellow)'],
+        ['Câmara por vereador', mil(porCadeira), 'por mês: gasto total de 2025 ÷ 27', '#f08a8a'],
+        ['Por habitante', brl(c25.empenhado / C.populacao), 'por ano para manter a Câmara (2025)', '#9a9a9a']
+      ].map(function (k) {
+        return '<div class="kpi" style="--kpi-cor:' + k[3] + '"><p class="kpi__rotulo">' + k[0] + '</p><p class="kpi__valor">' + k[1] + '</p><p class="kpi__sub">' + k[2] + '</p></div>';
+      }).join('');
+
+      document.getElementById('gabinete').innerHTML = '<thead><tr><th style="text-align:left">Cargo</th><th>Qtd.</th><th>Salário</th><th>Total no mês</th><th>Custo médio mensal</th></tr></thead><tbody>' +
+        C.gabinete.map(function (g) {
+          return '<tr><td>' + A.esc(g.cargo) + (g.nota ? '<small>' + A.esc(g.nota) + '</small>' : '') + '</td><td>' + g.qtd + '</td><td>' + brl(g.mensal) + '</td><td>' + brl(g.total) + '</td><td>' + brl(g.medio) + '</td></tr>';
+        }).join('') + '</tbody><tfoot><tr><td>Total do gabinete</td><td>' + C.gabinete.reduce(function (s, g) { return s + (g.tipo === 'carro' ? 0 : g.qtd); }, 0) + ' pessoas</td><td></td><td>' + brl(bruto) + '</td><td>' + brl(medio) + '</td></tr>' +
+        '<tr><td>Por ano (fora o combustível)</td><td></td><td></td><td></td><td>' + brl(medio * 12) + '</td></tr>' +
+        '<tr><td>Os 27 gabinetes, por ano</td><td></td><td></td><td></td><td>' + mil(medio * 12 * 27) + '</td></tr></tfoot>';
+
+      var maior = Math.max.apply(null, c25.itens.map(function (i) { return i.valor; }));
+      document.getElementById('barras').innerHTML = '<p class="kpi__sub" style="margin:0 0 4px">Total empenhado em 2025: <b style="color:var(--text)">' + brl(c25.empenhado) + '</b> · ' + mil(porCadeira) + ' por vereador por mês</p>' +
+        c25.itens.map(function (i) {
+          return '<div class="barra"><div class="barra__topo"><span>' + A.esc(i.grupo) + '</span><b>' + mil(i.valor) + ' · ' + (100 * i.valor / c25.empenhado).toFixed(1).replace('.', ',') + '%</b></div>' +
+            '<div class="barra__trilho"><i style="width:' + (100 * i.valor / maior).toFixed(1) + '%"></i></div>' + (i.detalhe ? '<small>' + A.esc(i.detalhe) + '</small>' : '') + '</div>';
+        }).join('');
+      document.getElementById('nota2026').textContent = 'Em 2026, o orçamento da Câmara subiu para ' + brl(c26.orcado, 0) + '. De janeiro a setembro, já foram empenhados ' + brl(c26.empenhado) +
+        ' (' + mil(c26.empenhado / 27 / c26.meses) + ' por vereador por mês).';
+
+      document.getElementById('contratos').innerHTML = C.contratos.map(function (c) {
+        return '<li><b>' + brl(c.valor) + '</b> · ' + A.esc(c.objeto) + ' <span class="kpi__sub" style="display:inline">(' + A.esc(c.nota) + ')</span></li>';
+      }).join('');
+      document.getElementById('fontes').innerHTML = C.fontes.map(function (f) {
+        return '<li><a href="' + A.esc(f.url) + '" target="_blank" rel="noopener" style="color:var(--yellow)">' + A.esc(f.nome) + '</a></li>';
+      }).join('');
+
+      ranking(medio);
+    });
+
+    // Ranking: custo do gabinete no período, proporcional às sessões em que cada um era titular.
+    function ranking(custoMensal) {
+      var cache = {}, modo = 'presenca';
+      var TEXTO = {
+        presenca: 'Custo do gabinete no período dividido pelo número de sessões ordinárias em que o vereador esteve presente. Quem falta mais tem cada presença mais cara.',
+        prop: 'Custo do gabinete no período dividido pelo número de projetos, requerimentos, moções e emendas que o vereador apresentou sozinho ou com até 5 colegas (proposições coletivas e indicações ficam de fora).',
+        tudo: 'Mesma conta, somando também as indicações (pedidos ao prefeito, quase todos de zeladoria). Indicação é fácil de fazer em série, então este critério favorece quem faz muitas.'
+      };
+      Promise.all([
+        fetch('dados/presencas.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }),
+        fetch('dados/proposicoes.json', { cache: 'no-cache' }).then(function (r) { return r.json(); })
+      ]).then(function (res) {
+        var S = res[0].sessoes.filter(function (s) { return s.tipo === 'Ordinária'; });
+        var datas = S.map(function (s) { return s.data; }).sort();
+        var meses = (new Date(datas[datas.length - 1]) - new Date('2025-02-01')) / 864e5 / 30.4375 + 1;
+        var V = {};
+        // "nomes" traz todos os titulares da sessão; quem está em "faltas" não compareceu.
+        S.forEach(function (s) {
+          var faltou = {}; s.faltas.forEach(function (f) { faltou[f[0]] = 1; });
+          s.nomes.concat(Object.keys(faltou).filter(function (n) { return s.nomes.indexOf(n) < 0; })).forEach(function (n) {
+            var v = V[chave(n)] = V[chave(n)] || { nome: n, tit: 0, pres: 0, prop: 0, ind: 0 };
+            v.tit++; if (!faltou[n]) v.pres++;
+          });
+        });
+        res[1].proposicoes.forEach(function (p) {
+          if (p.autores.length > 5 || p.tipo_id === 275 || p.tipo_id === 166 || p.data < '2025-02-01') return;
+          p.autores.forEach(function (a) { var v = V[chave(a.nome)]; if (v) v.prop++; });
+        });
+        Object.keys(V).forEach(function (k) { var v = V[k]; v.custo = custoMensal * meses * v.tit / S.length; v.suplente = v.tit < S.length * 0.9; });
+        cache.V = Object.keys(V).map(function (k) { return V[k]; }).filter(function (v) { return v.tit >= 10; });
+        cache.meses = meses; cache.sessoes = S.length;
+        desenhar();
+      });
+
+      function carregarIndicacoes() {
+        if (cache.ind) return Promise.resolve();
+        return fetch('dados/indicacoes.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (D) {
+          var por = {};
+          D.indicacoes.forEach(function (i) { if (i.d >= '2025-02-01') i.au.forEach(function (id) { var k = chave(D.autores[id] || ''); por[k] = (por[k] || 0) + 1; }); });
+          cache.V.forEach(function (v) { v.ind = por[chave(v.nome)] || 0; });
+          cache.ind = true;
+        });
+      }
+
+      function desenhar() {
+        document.getElementById('explica').textContent = TEXTO[modo] + ' Período: fevereiro de 2025 até a última sessão com lista de presença (' + cache.sessoes + ' sessões ordinárias).';
+        var lista = cache.V.map(function (v) {
+          var n = modo === 'presenca' ? v.pres : modo === 'prop' ? v.prop : v.prop + v.ind;
+          return { v: v, n: n, unit: n ? v.custo / n : Infinity };
+        }).sort(function (a, b) { return b.unit - a.unit; });
+        var max = Math.max.apply(null, lista.filter(function (x) { return isFinite(x.unit); }).map(function (x) { return x.unit; }));
+        var rot = modo === 'presenca' ? ['presença', 'presenças'] : modo === 'prop' ? ['proposição', 'proposições'] : ['proposta', 'propostas'];
+        document.getElementById('ranking').innerHTML = '<p class="kpi__sub" style="margin:0 0 8px">Do mais caro ao mais barato por ' + rot[0] + '.</p>' + lista.map(function (x, i) {
+          return '<div class="rk rk--custo' + (x.v.suplente ? ' rk--suplente' : '') + '"><span class="rk__nome">' + (i + 1) + 'º ' + A.esc(x.v.nome) + '</span>' +
+            '<span class="rk__barra"><i style="flex:0 0 ' + (isFinite(x.unit) ? (100 * x.unit / max).toFixed(1) : 100) + '%"></i></span>' +
+            '<span class="rk__total">' + (isFinite(x.unit) ? brl(x.unit, 0) : '—') + '<small>' + A.int(x.n) + ' ' + rot[x.n === 1 ? 0 : 1] + ' · ' + mil(x.v.custo) + ' no período</small></span></div>';
+        }).join('');
+      }
+
+      document.getElementById('abas').addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-m]'); if (!b) return;
+        modo = b.dataset.m;
+        document.querySelectorAll('#abas button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+        if (!cache.V) return;
+        (modo === 'tudo' ? carregarIndicacoes() : Promise.resolve()).then(desenhar);
+      });
+    }
+  })();
+  </script>
+</body>
+</html>
